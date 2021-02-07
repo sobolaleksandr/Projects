@@ -1,0 +1,36 @@
+C:\Users\Администратор\Documents\SharpDevelop Projects\Reports\Reports\bin\Debug\Reports.exe.config
+C:\Users\Администратор\Documents\SharpDevelop Projects\Reports\Reports\bin\Debug\Reports.exe
+C:\Users\Администратор\Documents\SharpDevelop Projects\Reports\Reports\bin\Debug\Reports.pdb
+C:\Users\Администратор\Documents\SharpDevelop Projects\Reports\Reports\bin\Debug\DocumentFormat.OpenXml.dll
+C:\Users\Администратор\Documents\SharpDevelop Projects\Reports\Reports\obj\Debug\Reports.csprojResolveAssemblyReference.cache
+C:\Users\Администратор\Documents\SharpDevelop Projects\Reports\Reports\obj\Debug\Reports.exe
+C:\Users\Администратор\Documents\SharpDevelop Projects\Reports\Reports\obj\Debug\Reports.pdb
+C:\Users\Администратор\Documents\SharpDevelop Projects\Reports\Reports\bin\Debug\EleSy.Common.Script.Debug.dll
+C:\Users\soboav\Desktop\Reports\Reports\obj\Debug\Reports.csprojAssemblyReference.cache
+C:\Users\soboav\Desktop\Reports\Reports\obj\Debug\Reports.csproj.CoreCompileInputs.cache
+C:\Users\soboav\Desktop\Reports\Reports\obj\Debug\Reports.exe
+C:\Users\soboav\Desktop\Reports\Reports\bin\Debug\Reports.exe.config
+C:\Users\soboav\Desktop\Reports\Reports\bin\Debug\Reports.exe
+C:\Users\soboav\Desktop\Reports\Reports\bin\Debug\Reports.pdb
+C:\Users\soboav\Desktop\Reports\Reports\obj\Debug\Reports.csproj.CopyComplete
+C:\Users\soboav\Desktop\Reports\Reports\obj\Debug\Reports.pdb
+D:\Work\C#\Reports\Reports\bin\Debug\Reports.exe.config
+D:\Work\C#\Reports\Reports\bin\Debug\Reports.exe
+D:\Work\C#\Reports\Reports\bin\Debug\Reports.pdb
+D:\Work\C#\Reports\Reports\obj\Debug\Reports.csprojAssemblyReference.cache
+D:\Work\C#\Reports\Reports\obj\Debug\Reports.csproj.CoreCompileInputs.cache
+D:\Work\C#\Reports\Reports\obj\Debug\Reports.csproj.CopyComplete
+D:\Work\C#\Reports\Reports\obj\Debug\Reports.exe
+D:\Work\C#\Reports\Reports\obj\Debug\Reports.pdb
+D:\Work\C#\Reports — копия\Reports\bin\Debug\Reports.exe.config
+D:\Work\C#\Reports — копия\Reports\bin\Debug\Reports.exe
+D:\Work\C#\Reports — копия\Reports\bin\Debug\Reports.pdb
+D:\Work\C#\Reports — копия\Reports\obj\Debug\Reports.csprojAssemblyReference.cache
+D:\Work\C#\Reports — копия\Reports\obj\Debug\Reports.csproj.CoreCompileInputs.cache
+D:\Work\C#\Reports — копия\Reports\obj\Debug\Reports.csproj.CopyComplete
+D:\Work\C#\Reports — копия\Reports\obj\Debug\Reports.exe
+D:\Work\C#\Reports — копия\Reports\obj\Debug\Reports.pdb
+D:\Users\TEMP.TPU.009\Documents\Visual Studio 2013\Projects\Reports\Reports\Reports\bin\Debug\Reports.exe.config
+D:\Users\TEMP.TPU.009\Documents\Visual Studio 2013\Projects\Reports\Reports\Reports\obj\Debug\Reports.exe
+D:\Users\TEMP.TPU.009\Documents\Visual Studio 2013\Projects\Reports\Reports\Reports\obj\Debug\Reports.pdb
+D:\Users\TEMP.TPU.009\Documents\Visual Studio 2013\Projects\Reports\Reports\Reports\obj\Debug\Reports.csprojResolveAssemblyReference.cache

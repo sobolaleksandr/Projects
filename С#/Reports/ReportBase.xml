@@ -1,0 +1,1746 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<repository>
+	<header dateTime="6/22/2018 2:27:59 PM" />
+	<sources />
+	<sourceViews>
+		<sourceView key="2668" name="Представление" comment="" created="5/24/2018 2:13:19 PM" createdBy="PLANT\shav">
+			<refs sourcesCount="0">
+				<folder key="2666" />
+			</refs>
+			<data>
+				<SOURCEVIEW>
+					<SOURCES />
+					<ITEMS>
+						<ITEM itemType="SCRIPT" id="78080d32-f3dc-428e-8520-3589416f255b" name="Hist" comment="Историческая сводка" bounds="53,29,150,161">
+							<COLUMNS>
+								<COLUMN id="887fb3df-5b5d-4bdd-8d2e-b7b646bd45ca" name="Tag" dataType="VARCHAR" />
+								<COLUMN id="547a8d48-7057-47c8-813d-12e0c0e2bdc2" name="Value" dataType="VARCHAR" />
+								<COLUMN id="26996e2b-6674-4238-b627-86aba9888106" name="Quality" dataType="INTEGER" />
+								<COLUMN id="7d7c4354-b26c-4d99-9d9d-dbe544bc5f4f" name="Date" dataType="VARCHAR" />
+								<COLUMN id="b890a9d3-7e61-48d2-ac0d-d75344ccafda" name="Time" dataType="VARCHAR" />
+								<COLUMN id="d38f4262-b506-46c8-af8a-9be55fc87f7c" name="desc" dataType="VARCHAR" />
+								<COLUMN id="e5750f16-3864-4c38-81ab-a02f048fbd01" name="obj" dataType="VARCHAR" />
+							</COLUMNS>
+							<PARAMS>
+								<PARAM id="a314a100-8ea3-4c49-b20b-cf6b27af8cf4" name="Day" dataType="DATE" value="06/21/2018" editType="SIMPLE" source="06/21/2018" array="N" />
+							</PARAMS>
+							<TEXT engine="CSharp">using System;
+using System.Data;
+using System.Collections;
+using EleSy.Common.Script;
+using System.Diagnostics;
+using System.IO;
+
+
+
+
+namespace Scripts
+{
+     /// &lt;summary&gt;
+     /// Класс используется для подготовки набора данных.
+     /// &lt;/summary&gt;
+     public class Script : IDataScript
+     {
+          /// &lt;summary&gt;
+          /// Возвращает набор данных.
+          /// &lt;/summary&gt;
+          /// &lt;param name="parameters"&gt;Параметры скрипта&lt;/param&gt;
+          /// &lt;returns&gt;Набор данных&lt;/returns&gt;
+          public DataSet GetData(object[] parameters )
+          { 
+string MasterIP = "localhost";
+string SlaveIP = "localhost";
+string OPCServer = "EleSy.HDADualSource";
+string OPCServer1 = "Elesy.DualSource";
+
+
+
+//DateTime endDate = DateTime.Now;//Конец интервала выборки
+
+DateTime startDate = System.Convert.ToDateTime(parameters[0]);//Конец интервала выборки
+
+DateTime endDate = startDate.AddDays(1) ;//Начало интервала выборки
+if (endDate &gt; DateTime.Now) {endDate =DateTime.Now;}
+
+//startDate =startDate.AddHours(-startDate.Hour) ;
+//startDate =startDate.AddMinutes(-startDate.Minute) ;
+//startDate =startDate.AddSeconds(-startDate.Second) ;
+//endDate = startDate.AddDays(1);
+
+DateTime curDate = startDate;//Переменная для запоминания текущей метки времени выборки
+
+//Создаем массив для записи
+ArrayList values = new ArrayList();
+Opc.URL url = new Opc.URL("opchda://" + MasterIP + "/" + OPCServer);
+Opc.Hda.Server server = new Opc.Hda.Server(new OpcCom.Factory(), url);
+
+Opc.URL url1 = new Opc.URL("opcda://" + MasterIP + "/" + OPCServer1);
+Opc.Da.Server server1 = new Opc.Da.Server(new OpcCom.Factory(), url1);
+
+			DataSet result = new DataSet();
+			DataTable table = new DataTable("ScriptData");
+			
+			//Объявление таблицы для хранения данных
+
+table.Columns.Add("Tag", typeof(System.String));
+table.Columns.Add("Value", typeof(System.String));
+table.Columns.Add("Date", typeof(System.String));
+table.Columns.Add("Time", typeof(System.String));
+table.Columns.Add("Quality", typeof(System.String));
+table.Columns.Add("desc", typeof(System.String));
+table.Columns.Add("obj", typeof(System.String));
+
+result.Tables.Add(table);
+					
+			//Объявляем строковый массив с тегами
+
+StreamReader streamReader = System.IO.File.OpenText(@"C:\Data\Reports\TomskAzot.ini");
+//Вспомогательная переменная - строка
+string tmp = "";
+
+
+string prefix = "";
+
+//Массив, в который нужно записать значения
+ArrayList TEMP = new ArrayList();
+ArrayList TEMP_desc = new ArrayList();
+ArrayList TEMP_type = new ArrayList();
+ArrayList TEMP_eunit = new ArrayList();
+//Пишем, пока в файле есть строки
+
+while (!streamReader.EndOfStream)
+{
+    //tmp = prefix + streamReader.ReadLine();
+    tmp = prefix + streamReader.ReadLine();
+    //Помещаем в массив
+    TEMP.Add(tmp);
+}
+
+
+
+//Соединяемся с сервером
+try
+{
+    server.Connect();
+}
+catch
+{
+url = new Opc.URL("opchda://" + SlaveIP + "/" + OPCServer);
+server = new Opc.Hda.Server(new OpcCom.Factory(), url);
+try
+{
+    server.Connect();
+}
+catch
+{ 
+}
+}
+
+
+try
+{
+    server1.Connect();
+}
+catch
+{
+url1 = new Opc.URL("opcda://" + SlaveIP + "/" + OPCServer1);
+server1 = new Opc.Da.Server(new OpcCom.Factory(), url1);
+try
+{
+    server1.Connect();
+}
+catch
+{ 
+}
+}
+
+
+System.Threading.Thread.Sleep (1500); // время необходимое для подключения к \\источнику данных; ОБЯЗАТЕЛЬНЫЙ ПАРАМЕТР! Параметр в скобках задается в \\миллисекундах;
+
+Opc.Da.Item[] TMP_desc = new Opc.Da.Item[TEMP.Count];
+Opc.Da.Item[] TMP_type = new Opc.Da.Item[TEMP.Count];
+Opc.Da.Item[] TMP_eunit = new Opc.Da.Item[TEMP.Count];
+Opc.ItemIdentifier[]  TMP1 = new Opc.ItemIdentifier[TEMP.Count];
+
+for (int i = 0; i &lt; TEMP.Count; i++)
+{   
+    string tag;
+    tag=TEMP[i].ToString();
+    TMP1[i] =new Opc.ItemIdentifier(tag ); 
+
+    if (tag.IndexOf("status") != -1)
+   	{TMP_desc[i] = new Opc.Da.Item(new Opc.ItemIdentifier(tag.Replace(".state.status",".Description")));
+	 TMP_type[i] = new Opc.Da.Item(new Opc.ItemIdentifier(tag.Replace(".state.status",".popup")));}
+    else
+	{TMP_desc[i] = new Opc.Da.Item(new Opc.ItemIdentifier(tag + ".Description"));
+	TMP_type[i] = new Opc.Da.Item(new Opc.ItemIdentifier(tag + ".popup"));  }
+    
+    TMP_eunit[i] = new Opc.Da.Item(new Opc.ItemIdentifier(tag + ".eunit")); 
+
+}
+//Читаем данные
+Opc.IdentifiedResult[] items1 = server.CreateItems(TMP1);
+Opc.Da.ItemValueResult[] vTMP_desc = server1.Read(TMP_desc);
+Opc.Da.ItemValueResult[] vTMP_type = server1.Read(TMP_type);
+Opc.Da.ItemValueResult[] vTMP_eunit = server1.Read(TMP_eunit);
+
+for (int i = 0; i &lt; TEMP.Count; i++)
+{   
+    TEMP_desc.Add(System.Convert.ToString(vTMP_desc[i].Value)); 
+    TEMP_type.Add(System.Convert.ToString(vTMP_type[i].Value));
+    TEMP_eunit.Add(System.Convert.ToString(vTMP_eunit[i].Value));  
+}
+try
+{
+    server1.Disconnect();
+}
+catch
+{
+}
+
+
+
+Opc.Hda.Time startTime = new Opc.Hda.Time(startDate);
+Opc.Hda.Time endTime = new Opc.Hda.Time(endDate);
+
+
+while(curDate &lt;= endDate)
+{
+Opc.Hda.Time curTime = new Opc.Hda.Time(curDate);
+
+Opc.Hda.ItemValueCollection[] values1 = server.ReadRaw(curTime ,  curTime , 100, true, items1);
+
+
+for (int i = 0; i &lt; values1.Length; i++)
+{
+        DataRow row = table.NewRow();
+        table.Rows.Add(row);
+
+        row[0] = values1[i].ItemName;
+	row[1] = values1[i][0] == null ? System.Convert.ToDouble(DBNull.Value) : (System.Math.Round(System.Convert.ToDouble(values1[i][0].Value), 2)); 
+
+	
+
+	//row[2] = values1[i][0].Timestamp.ToString("yyyy.MM.dd HH:mm");
+	row[2] = curDate.ToString("yyyy.MM.dd");
+        row[3] = curDate.ToString("HH:mm");
+	if((curDate == endDate) &amp;&amp; (curDate.ToString("HH:mm") == "00:00")){row[3]="24:00";}
+
+        row[4] = values1[i][0].Quality.GetCode(); 
+  	row[5] =  TEMP_desc[i]; 
+	row[6] =  TEMP_type[i];  
+
+	if ((System.Convert.ToString(row[6])=="AP") || (System.Convert.ToString(row[6])=="AP1H"))  {row[5]=row[5]+", " + TEMP_eunit[i]; }
+
+
+	if (System.Convert.ToString(row[6])=="AGT")
+        {switch (System.Convert.ToString(row[1]))
+         {
+         case "1":
+              row[1] ="Отключен, нет напряжения";
+	      break; 
+          case "2":
+              row[1] ="Отключен, цепи вкл. неиспр.";
+	      break; 
+          case "3":
+              row[1] ="Отключен";
+	      break; 
+          case "4":
+              row[1] ="Отключается";
+	      break; 
+          case "5":
+              row[1] ="Включается";
+	      break; 
+          case "6":
+              row[1] ="Включен, пускатель неиспр.";
+	      break; 
+          case "7":
+              row[1] ="Включен, цепи откл. неиспр.";
+	      break; 
+          case "8":
+              row[1] ="Включен";
+	      break; 
+          case "0":
+              row[1] ="Н/Д";
+	      break; 
+        }
+      }
+
+
+	if ((System.Convert.ToString(row[6])=="VLV")|| (System.Convert.ToString(row[6])=="REG"))
+        {switch (System.Convert.ToString(row[1]))
+         {
+          case "1":
+              row[1] ="Открыт";
+	      break; 
+          case "2":
+              row[1] ="Закрыт";
+	      break; 
+          case "3":
+              row[1] ="Промежуток";
+	      break; 
+          case "4":
+              row[1] ="Неопред.";
+	      break; 
+          case "5":
+              row[1] ="В движении";
+	      break; 
+          case "6":
+              row[1] ="Открывается";
+	      break; 
+          case "7":
+              row[1] ="Закрывается";
+	      break; 
+          case "0":
+              row[1] ="Н/Д";
+	      break; 
+        }
+      }
+}
+curDate=curDate.AddHours(2);
+}
+
+
+
+
+try
+{
+    server.Disconnect();
+}
+catch
+{
+}
+
+
+			return result;		
+          }
+     }
+
+class Datas
+{
+	string Name {get; set;}
+	
+}
+}
+</TEXT>
+							<STARTUP className="Scripts.Script" />
+							<REFERENCES>
+								<REFERENCE name="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture = MSIL" version="2.0.0.0" />
+								<REFERENCE name="System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture = X86" version="2.0.0.0" />
+								<REFERENCE name="System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture = MSIL" version="2.0.0.0" />
+								<REFERENCE name="OpcNetApi, Version=2.0.2.4, Culture=neutral, PublicKeyToken=78aea80f6827b5ab, processorArchitecture=x86" version="2.0.2.4" />
+								<REFERENCE name="OpcNetApi.Com, Version=2.0.1.6, Culture=neutral, PublicKeyToken=78aea80f6827b5ab, processorArchitecture=x86" version="2.0.1.6" />
+								<REFERENCE name="EleSy.Common, Version=2.0.0.12, Culture=neutral, PublicKeyToken=f5d37ef2bbc814e4, ProcessorArchitecture = MSIL" version="2.0.0.12" />
+							</REFERENCES>
+						</ITEM>
+						<ITEM itemType="SCRIPT" id="65bcb876-99c1-4a0d-a885-5ccbb3511b33" name="Oper" comment="Оперативная сводка" bounds="219,27,150,161">
+							<COLUMNS>
+								<COLUMN id="887fb3df-5b5d-4bdd-8d2e-b7b646bd45ca" name="Tag" dataType="VARCHAR" />
+								<COLUMN id="547a8d48-7057-47c8-813d-12e0c0e2bdc2" name="Value" dataType="VARCHAR" />
+								<COLUMN id="26996e2b-6674-4238-b627-86aba9888106" name="Quality" dataType="INTEGER" />
+								<COLUMN id="d38f4262-b506-46c8-af8a-9be55fc87f7c" name="desc" dataType="VARCHAR" />
+								<COLUMN id="e5750f16-3864-4c38-81ab-a02f048fbd01" name="obj" dataType="VARCHAR" />
+							</COLUMNS>
+							<PARAMS />
+							<TEXT engine="CSharp">using System;
+using System.Data;
+using System.Collections;
+using EleSy.Common.Script;
+using System.Diagnostics;
+using System.IO;
+
+
+
+namespace Scripts
+{
+     /// &lt;summary&gt;
+     /// Класс используется для подготовки набора данных.
+     /// &lt;/summary&gt;
+     public class Script : IDataScript
+     {
+          /// &lt;summary&gt;
+          /// Возвращает набор данных.
+          /// &lt;/summary&gt;
+          /// &lt;param name="parameters"&gt;Параметры скрипта&lt;/param&gt;
+          /// &lt;returns&gt;Набор данных&lt;/returns&gt;
+          public DataSet GetData(object[] parameters )
+          { 
+string MasterIP = "localhost";
+string SlaveIP = "10.41.17.73";
+
+string OPCServer1 = "Elesy.DualSource";
+
+
+
+
+//Создаем массив для записи
+ArrayList values = new ArrayList();
+
+
+Opc.URL url1 = new Opc.URL("opcda://" + MasterIP + "/" + OPCServer1);
+Opc.Da.Server server1 = new Opc.Da.Server(new OpcCom.Factory(), url1);
+
+			DataSet result = new DataSet();
+			DataTable table = new DataTable("ScriptData");
+			
+			//Объявление таблицы для хранения данных
+
+table.Columns.Add("Tag", typeof(System.String));
+table.Columns.Add("Value", typeof(System.String));
+table.Columns.Add("Quality", typeof(System.String));
+table.Columns.Add("desc", typeof(System.String));
+table.Columns.Add("obj", typeof(System.String));
+
+result.Tables.Add(table);
+					
+			//Объявляем строковый массив с тегами
+
+StreamReader streamReader = System.IO.File.OpenText(@"C:\Data\Reports\TomskAzot.ini");
+//Вспомогательная переменная - строка
+string tmp = "";
+
+
+string prefix = "";
+
+//Массив, в который нужно записать значения
+ArrayList TEMP = new ArrayList();
+ArrayList TEMP_desc = new ArrayList();
+ArrayList TEMP_type = new ArrayList();
+ArrayList TEMP_eunit = new ArrayList();
+//Пишем, пока в файле есть строки
+
+while (!streamReader.EndOfStream)
+{
+    tmp = prefix + streamReader.ReadLine();
+    //Помещаем в массив
+    TEMP.Add(tmp);
+}
+
+
+
+//Соединяемся с сервером
+
+try
+{
+    server1.Connect();
+}
+catch
+{
+url1 = new Opc.URL("opcda://" + SlaveIP + "/" + OPCServer1);
+server1 = new Opc.Da.Server(new OpcCom.Factory(), url1);
+try
+{
+    server1.Connect();
+}
+catch
+{ 
+}
+}
+
+
+System.Threading.Thread.Sleep (1500); // время необходимое для подключения к \\источнику данных; ОБЯЗАТЕЛЬНЫЙ ПАРАМЕТР! Параметр в скобках задается в \\миллисекундах;
+
+Opc.Da.Item[] TMP_desc = new Opc.Da.Item[TEMP.Count];
+Opc.Da.Item[] TMP_type = new Opc.Da.Item[TEMP.Count];
+Opc.Da.Item[] TMP_eunit = new Opc.Da.Item[TEMP.Count];
+Opc.Da.Item[] TMP = new Opc.Da.Item[TEMP.Count];
+
+for (int i = 0; i &lt; TEMP.Count; i++)
+{   
+    string tag;
+    tag=TEMP[i].ToString();
+    TMP[i] = new Opc.Da.Item(new Opc.ItemIdentifier(tag)); 
+    if (tag.IndexOf("status") != -1)
+   	{TMP_desc[i] = new Opc.Da.Item(new Opc.ItemIdentifier(tag.Replace(".state.status",".Description")));
+	TMP_type[i] = new Opc.Da.Item(new Opc.ItemIdentifier(tag.Replace(".state.status",".popup")));
+	}
+    else
+	{TMP_desc[i] = new Opc.Da.Item(new Opc.ItemIdentifier(tag + ".Description"));
+	 TMP_type[i] = new Opc.Da.Item(new Opc.ItemIdentifier(tag + ".popup")); }
+     
+    TMP_eunit[i] = new Opc.Da.Item(new Opc.ItemIdentifier(tag + ".eunit")); 
+
+}
+//Читаем данные
+Opc.Da.ItemValueResult[] TMP1 = server1.Read(TMP);
+Opc.Da.ItemValueResult[] vTMP_desc = server1.Read(TMP_desc);
+Opc.Da.ItemValueResult[] vTMP_type = server1.Read(TMP_type);
+Opc.Da.ItemValueResult[] vTMP_eunit = server1.Read(TMP_eunit);
+
+for (int i = 0; i &lt; TEMP.Count; i++)
+{   
+
+	DataRow row = table.NewRow();
+	table.Rows.Add(row);
+
+	tmp=TEMP[i].ToString();	// имя тэга
+	row[0]=tmp;		// имя тэга
+	row[1] = System.Convert.ToString(System.Math.Round(System.Convert.ToDouble(TMP1[i].Value),2));
+	row[2] = TMP1[i].Quality.GetCode();
+	row[3] = vTMP_desc[i].Value;
+	row[4] = vTMP_type[i].Value;
+
+
+	if ((System.Convert.ToString(row[4])=="AP") || (System.Convert.ToString(row[4])=="AP1H")){row[3]=row[3]+", " + vTMP_eunit[i].Value; }
+
+
+	if (System.Convert.ToString(row[4])=="AGT")
+        {switch (System.Convert.ToString(row[1]))
+         {
+          case "1":
+              row[1] ="Отключен, нет напряжения";
+	      break; 
+          case "2":
+              row[1] ="Отключен, цепи вкл. неиспр.";
+	      break; 
+          case "3":
+              row[1] ="Отключен";
+	      break; 
+          case "4":
+              row[1] ="Отключается";
+	      break; 
+          case "5":
+              row[1] ="Включается";
+	      break; 
+          case "6":
+              row[1] ="Включен, пускатель неиспр.";
+	      break; 
+          case "7":
+              row[1] ="Включен, цепи откл. неиспр.";
+	      break; 
+          case "8":
+              row[1] ="Включен";
+	      break; 
+          case "0":
+              row[1] ="Н/Д";
+	      break; 
+        }
+      }
+
+
+	if ((System.Convert.ToString(row[4])=="VLV")|| (System.Convert.ToString(row[4])=="REG"))
+        {switch (System.Convert.ToString(row[1]))
+         {
+          case "1":
+              row[1] ="Открыт";
+	      break; 
+          case "2":
+              row[1] ="Закрыт";
+	      break; 
+          case "3":
+              row[1] ="Промежуток";
+	      break; 
+          case "4":
+              row[1] ="Неопред.";
+	      break; 
+          case "5":
+              row[1] ="В движении";
+	      break; 
+          case "6":
+              row[1] ="Открывается";
+	      break; 
+          case "7":
+              row[1] ="Закрывается";
+	      break; 
+          case "0":
+              row[1] ="Н/Д";
+	      break; 
+        }
+      }
+}
+try
+{
+    server1.Disconnect();
+}
+catch
+{
+}
+
+
+	return result;		
+          }
+     }
+
+class Datas
+{
+	string Name {get; set;}
+	
+}
+}
+</TEXT>
+							<STARTUP className="Scripts.Script" />
+							<REFERENCES>
+								<REFERENCE name="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture = MSIL" version="2.0.0.0" />
+								<REFERENCE name="System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture = X86" version="2.0.0.0" />
+								<REFERENCE name="System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture = MSIL" version="2.0.0.0" />
+								<REFERENCE name="OpcNetApi, Version=2.0.2.4, Culture=neutral, PublicKeyToken=78aea80f6827b5ab, processorArchitecture=x86" version="2.0.2.4" />
+								<REFERENCE name="OpcNetApi.Com, Version=2.0.1.6, Culture=neutral, PublicKeyToken=78aea80f6827b5ab, processorArchitecture=x86" version="2.0.1.6" />
+								<REFERENCE name="EleSy.Common, Version=2.0.0.12, Culture=neutral, PublicKeyToken=f5d37ef2bbc814e4, ProcessorArchitecture = MSIL" version="2.0.0.12" />
+							</REFERENCES>
+						</ITEM>
+					</ITEMS>
+					<RELATIONSHIPS />
+				</SOURCEVIEW>
+			</data>
+		</sourceView>
+	</sourceViews>
+	<businessObjects>
+		<bizObject key="2669" name="Бизнес-объект" comment="" created="5/24/2018 2:13:19 PM" createdBy="PLANT\shav">
+			<refs>
+				<folder key="2666" />
+			</refs>
+			<data>
+				<BUSINESSOBJECT>
+					<ATTRIBUTES>
+						<ATTRIBUTE id="2ce61040-11d2-4555-9020-b251ac20d820" name="val" dataType="VARCHAR" />
+						<ATTRIBUTE id="5fb1e39c-d445-4d38-abea-c99003a9223d" name="date" dataType="VARCHAR" />
+						<ATTRIBUTE id="e507f55c-2e47-4b6b-ab72-bbbbe5dc6ccb" name="time" dataType="VARCHAR" />
+						<ATTRIBUTE id="a44041db-46aa-47e6-af85-17f6a862072b" name="qual" dataType="VARCHAR" />
+						<ATTRIBUTE id="d5acd987-4a89-4aa8-b374-c42dd6d3e7bc" name="desc" dataType="VARCHAR" />
+						<ATTRIBUTE id="6ce90048-05da-4137-93fd-d2b70661e111" name="obj" dataType="VARCHAR" />
+					</ATTRIBUTES>
+				</BUSINESSOBJECT>
+			</data>
+		</bizObject>
+	</businessObjects>
+	<businessViews>
+		<bizView key="2670" name="Бизнес-представление" comment="" created="5/24/2018 2:13:19 PM" createdBy="PLANT\shav">
+			<refs>
+				<folder key="2666" />
+				<bizObjectRef key="2669" />
+			</refs>
+		</bizView>
+	</businessViews>
+	<mappings>
+		<mapping key="2671" name="Отображение" comment="" created="5/24/2018 2:13:19 PM" createdBy="PLANT\shav">
+			<refs>
+				<folder key="2666" />
+				<bizView key="2670" />
+				<sourceView key="2668" />
+			</refs>
+			<data>
+				<MAPPING>
+					<BUSINESSOBJECT id="2669">
+						<ITEMS>
+							<ITEM mapItemId="e09a24db-dd69-447b-8a5e-682d0a45642e" itemId="78080d32-f3dc-428e-8520-3589416f255b" alias="Hist" />
+						</ITEMS>
+						<RELATIONSHIPS />
+						<ASSOCIATIONS>
+							<ASSOCIATION attributeId="2ce61040-11d2-4555-9020-b251ac20d820" mapItemId="e09a24db-dd69-447b-8a5e-682d0a45642e" columnId="547a8d48-7057-47c8-813d-12e0c0e2bdc2" />
+							<ASSOCIATION attributeId="5fb1e39c-d445-4d38-abea-c99003a9223d" mapItemId="e09a24db-dd69-447b-8a5e-682d0a45642e" columnId="7d7c4354-b26c-4d99-9d9d-dbe544bc5f4f" />
+							<ASSOCIATION attributeId="e507f55c-2e47-4b6b-ab72-bbbbe5dc6ccb" mapItemId="e09a24db-dd69-447b-8a5e-682d0a45642e" columnId="b890a9d3-7e61-48d2-ac0d-d75344ccafda" />
+							<ASSOCIATION attributeId="a44041db-46aa-47e6-af85-17f6a862072b" mapItemId="e09a24db-dd69-447b-8a5e-682d0a45642e" columnId="26996e2b-6674-4238-b627-86aba9888106" />
+							<ASSOCIATION attributeId="d5acd987-4a89-4aa8-b374-c42dd6d3e7bc" mapItemId="e09a24db-dd69-447b-8a5e-682d0a45642e" columnId="d38f4262-b506-46c8-af8a-9be55fc87f7c" />
+							<ASSOCIATION attributeId="6ce90048-05da-4137-93fd-d2b70661e111" mapItemId="e09a24db-dd69-447b-8a5e-682d0a45642e" columnId="e5750f16-3864-4c38-81ab-a02f048fbd01" />
+						</ASSOCIATIONS>
+					</BUSINESSOBJECT>
+				</MAPPING>
+			</data>
+		</mapping>
+		<mapping key="2726" name="ОтображениеOпер" comment="" created="5/25/2018 11:11:25 AM" createdBy="PLANT\shav">
+			<refs>
+				<folder key="2666" />
+				<bizView key="2670" />
+				<sourceView key="2668" />
+			</refs>
+			<data>
+				<MAPPING>
+					<BUSINESSOBJECT id="2669">
+						<ITEMS>
+							<ITEM mapItemId="8ade6d97-6f91-4b7c-8458-ce3efcf84582" itemId="65bcb876-99c1-4a0d-a885-5ccbb3511b33" alias="Oper" />
+						</ITEMS>
+						<RELATIONSHIPS />
+						<ASSOCIATIONS>
+							<ASSOCIATION attributeId="2ce61040-11d2-4555-9020-b251ac20d820" mapItemId="8ade6d97-6f91-4b7c-8458-ce3efcf84582" columnId="547a8d48-7057-47c8-813d-12e0c0e2bdc2" />
+							<ASSOCIATION attributeId="a44041db-46aa-47e6-af85-17f6a862072b" mapItemId="8ade6d97-6f91-4b7c-8458-ce3efcf84582" columnId="26996e2b-6674-4238-b627-86aba9888106" />
+							<ASSOCIATION attributeId="d5acd987-4a89-4aa8-b374-c42dd6d3e7bc" mapItemId="8ade6d97-6f91-4b7c-8458-ce3efcf84582" columnId="d38f4262-b506-46c8-af8a-9be55fc87f7c" />
+							<ASSOCIATION attributeId="6ce90048-05da-4137-93fd-d2b70661e111" mapItemId="8ade6d97-6f91-4b7c-8458-ce3efcf84582" columnId="e5750f16-3864-4c38-81ab-a02f048fbd01" />
+						</ASSOCIATIONS>
+					</BUSINESSOBJECT>
+				</MAPPING>
+			</data>
+		</mapping>
+	</mappings>
+	<templates>
+		<template key="2672" name="Шаблон" comment="" created="5/24/2018 2:13:19 PM" createdBy="PLANT\shav" format="Pdf">
+			<refs>
+				<folder key="2666" />
+				<bizView key="2670" />
+				<defaultMapping key="2671" />
+			</refs>
+			<data>
+				<REPORT name="Шаблон" version="3.1" break.vertical="no" break.horizontal="no">
+	<PAGES>
+		<PAGE name="Аналоговые_параметры" sheet.name="Аналоговые_параметры" sheet.name.treat="plain" orientation="portrait" margin.top="4" margin.bottom="4" margin.left="4" margin.right="4" zoom="100">
+			<CONTENT>
+				<LABEL name="Шапка" text="Concat('Историческая двухчасовая сводка по технологическим параметрам за сутки ', ${День_сводки})" text.treat="expression" repeat="yes" align.top="no" align.bottom="no" align.right="no" align.left="no">
+					<LOCATION left="4" top="4" />
+					<SIZE width="196.25" height="6.25" />
+					<FORMAT>
+						<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="12" color.choice="black" bold="yes" italic="no" underline="no" />
+						<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="no" align.linear="" />
+						<FILL overlap="style" pattern="style">
+							<BACKGROUND color.choice="style" />
+							<FOREGROUND color.choice="style" />
+						</FILL>
+						<BORDER>
+							<LEFT border.style="style" color.choice="style" />
+							<RIGHT border.style="style" color.choice="style" />
+							<TOP border.style="style" color.choice="style" />
+							<BOTTOM border.style="style" color.choice="style" />
+							<HORIZONTAL border.style="style" color.choice="style" />
+							<VERTICAL border.style="style" color.choice="style" />
+						</BORDER>
+					</FORMAT>
+				</LABEL>
+				<LABEL name="Дата" text="Concat('Сформирован ', DateTimeToString(Now,'dd.MM.yyyy HH:mm:ss'))" text.treat="expression" repeat="yes" align.top="no" align.bottom="no" align.right="no" align.left="yes">
+					<LOCATION left="4" top="10.5" />
+					<SIZE width="158" height="6" />
+					<FORMAT>
+						<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="11" color.choice="black" bold="yes" italic="no" underline="no" />
+						<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="left" align.vertical="center" auto.fit="no" align.linear="" />
+						<FILL overlap="style" pattern="style">
+							<BACKGROUND color.choice="style" />
+							<FOREGROUND color.choice="style" />
+						</FILL>
+						<BORDER>
+							<LEFT border.style="style" color.choice="style" />
+							<RIGHT border.style="style" color.choice="style" />
+							<TOP border.style="style" color.choice="style" />
+							<BOTTOM border.style="style" color.choice="style" />
+							<HORIZONTAL border.style="style" color.choice="style" />
+							<VERTICAL border.style="style" color.choice="style" />
+						</BORDER>
+					</FORMAT>
+				</LABEL>
+				<TABLE name="Таблица1" freeze.columns="no" freeze.rows="no">
+					<LOCATION left="4" top="25" />
+					<CORNER>
+						<SIZE width="-10" height="-10" />
+					</CORNER>
+					<COLUMNS>
+						<BLOCK name="Блок2_Копия2">
+							<TITLE text="Atlist" text.treat="expression">
+								<FORMAT>
+									<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="no" align.linear="" />
+									<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="10" color.choice="black" bold="no" italic="yes" underline="no" />
+									<BORDER>
+										<LEFT border.style="Thin" color.choice="custom" />
+										<RIGHT border.style="Thin" color.choice="custom" />
+										<TOP border.style="Thin" color.choice="custom" />
+										<BOTTOM border.style="Thin" color.choice="custom" />
+										<HORIZONTAL border.style="style" color.choice="style" />
+										<VERTICAL border.style="Thin" color.choice="style" />
+									</BORDER>
+									<FILL overlap="style" pattern="Solid">
+										<BACKGROUND color.choice="custom" color.custom="FFFFFF" />
+										<FOREGROUND color.choice="style" />
+									</FILL>
+								</FORMAT>
+							</TITLE>
+							<SIZE width="13.75" height="6.999999" />
+							<DIMENSION instantiation="List({Бизнес-объект}:{time})" />
+						</BLOCK>
+					</COLUMNS>
+					<ROWS>
+						<BLOCK name="Блок2">
+							<TITLE text="Atlist" text.treat="expression">
+								<FORMAT>
+									<TEXT wrap="yes" fit="no" orientation.choice="custom" align.horizontal="left" align.vertical="center" auto.fit="yes" align.linear="" />
+									<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="9" color.choice="black" bold="no" italic="no" underline="no" />
+									<BORDER>
+										<LEFT border.style="Thin" color.choice="style" />
+										<RIGHT border.style="Thin" color.choice="style" />
+										<TOP border.style="Thin" color.choice="custom" />
+										<BOTTOM border.style="Thin" color.choice="custom" />
+										<HORIZONTAL border.style="Thin" color.choice="style" />
+										<VERTICAL border.style="style" color.choice="style" />
+									</BORDER>
+									<FILL overlap="style" pattern="Solid">
+										<BACKGROUND color.choice="custom" color.custom="FFFFFF" />
+										<FOREGROUND color.choice="style" />
+									</FILL>
+									<NUMBER choice="custom" custom="General" />
+								</FORMAT>
+							</TITLE>
+							<SIZE width="133" height="5.250001" />
+							<DIMENSION instantiation="List({Бизнес-объект}:{desc})">
+								<SORT />
+							</DIMENSION>
+							<DATA filter="or(Comp({Бизнес-объект}:{obj}, eq, 'AP'),Comp({Бизнес-объект}:{obj}, eq, 'AP1H'))" />
+						</BLOCK>
+					</ROWS>
+					<GRID>
+						<GTR>
+							<GTD>
+								<FORMAT>
+									<BORDER>
+										<LEFT border.style="style" color.choice="style" />
+										<RIGHT border.style="Thin" color.choice="custom" />
+										<TOP border.style="Thin" color.choice="custom" />
+										<BOTTOM border.style="Thin" color.choice="custom" />
+										<HORIZONTAL border.style="style" color.choice="style" />
+										<VERTICAL border.style="style" color.choice="style" />
+									</BORDER>
+									<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="12" color.choice="black" bold="no" italic="yes" underline="no" />
+									<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="no" align.linear="" />
+									<FILL overlap="style" pattern="style">
+										<BACKGROUND color.choice="style" />
+										<FOREGROUND color.choice="style" />
+									</FILL>
+								</FORMAT>
+								<VALUES />
+								<DATA expression="val({Бизнес-объект}:{val})" />
+								<CONDITIONAL.FORMATS>
+									<CONDITIONAL.FORMAT condition="val({Бизнес-объект}:{qual})&lt;192">
+										<FORMAT>
+											<BORDER>
+												<LEFT border.style="style" color.choice="style" />
+												<RIGHT border.style="style" color.choice="style" />
+												<TOP border.style="style" color.choice="style" />
+												<BOTTOM border.style="style" color.choice="style" />
+											</BORDER>
+											<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="style" align.linear="" />
+											<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="12" color.choice="custom" color.custom="33CCCC" bold="no" italic="yes" underline="no" />
+											<FILL overlap="style" pattern="style">
+												<BACKGROUND color.choice="style" />
+												<FOREGROUND color.choice="style" />
+											</FILL>
+										</FORMAT>
+									</CONDITIONAL.FORMAT>
+								</CONDITIONAL.FORMATS>
+							</GTD>
+						</GTR>
+					</GRID>
+				</TABLE>
+				<LABEL name="ап" text="Аналоговые параметры" text.treat="plain" repeat="yes" align.top="no" align.bottom="no" align.right="no" align.left="yes">
+					<LOCATION left="4" top="18.75" />
+					<SIZE width="41.25" height="5" />
+					<FORMAT>
+						<TEXT wrap="no" fit="yes" orientation.choice="custom" align.horizontal="left" align.vertical="center" auto.fit="no" align.linear="" />
+						<FONT name.choice="windows" name.windows="Arial" size.choice="custom" size.custom="10" color.choice="black" bold="yes" italic="no" underline="no" />
+						<FILL overlap="style" pattern="style">
+							<BACKGROUND color.choice="style" />
+							<FOREGROUND color.choice="style" />
+						</FILL>
+						<BORDER>
+							<LEFT border.style="none" color.choice="auto" />
+							<RIGHT border.style="none" color.choice="auto" />
+							<TOP border.style="none" color.choice="auto" />
+							<BOTTOM border.style="none" color.choice="auto" />
+							<HORIZONTAL border.style="style" color.choice="style" />
+							<VERTICAL border.style="style" color.choice="style" />
+						</BORDER>
+					</FORMAT>
+				</LABEL>
+			</CONTENT>
+			<SIZE width="210" height="297" />
+			<VALUES />
+			<DATA />
+			<DIMENSION />
+		</PAGE>
+		<PAGE name="Агрегаты" sheet.name="Агрегаты" sheet.name.treat="plain" orientation="portrait" margin.top="4" margin.bottom="4" margin.left="4" margin.right="4" zoom="100">
+			<CONTENT>
+				<LABEL name="Шапка" text="Concat('Историческая двухчасовая сводка по технологическим параметрам за сутки ', ${День_сводки})" text.treat="expression" repeat="yes" align.top="no" align.bottom="no" align.right="no" align.left="no">
+					<LOCATION left="4" top="4" />
+					<SIZE width="196.25" height="6.25" />
+					<FORMAT>
+						<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="12" color.choice="black" bold="yes" italic="no" underline="no" />
+						<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="no" align.linear="" />
+						<FILL overlap="style" pattern="style">
+							<BACKGROUND color.choice="style" />
+							<FOREGROUND color.choice="style" />
+						</FILL>
+						<BORDER>
+							<LEFT border.style="style" color.choice="style" />
+							<RIGHT border.style="style" color.choice="style" />
+							<TOP border.style="style" color.choice="style" />
+							<BOTTOM border.style="style" color.choice="style" />
+							<HORIZONTAL border.style="style" color.choice="style" />
+							<VERTICAL border.style="style" color.choice="style" />
+						</BORDER>
+					</FORMAT>
+				</LABEL>
+				<LABEL name="Дата" text="Concat('Сформирован ', DateTimeToString(Now,'dd.MM.yyyy HH:mm:ss'))" text.treat="expression" repeat="yes" align.top="no" align.bottom="no" align.right="no" align.left="yes">
+					<LOCATION left="4" top="10.5" />
+					<SIZE width="158" height="6" />
+					<FORMAT>
+						<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="11" color.choice="black" bold="yes" italic="no" underline="no" />
+						<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="left" align.vertical="center" auto.fit="no" align.linear="" />
+						<FILL overlap="style" pattern="style">
+							<BACKGROUND color.choice="style" />
+							<FOREGROUND color.choice="style" />
+						</FILL>
+						<BORDER>
+							<LEFT border.style="style" color.choice="style" />
+							<RIGHT border.style="style" color.choice="style" />
+							<TOP border.style="style" color.choice="style" />
+							<BOTTOM border.style="style" color.choice="style" />
+							<HORIZONTAL border.style="style" color.choice="style" />
+							<VERTICAL border.style="style" color.choice="style" />
+						</BORDER>
+					</FORMAT>
+				</LABEL>
+				<TABLE name="Таблица1_Копия1" freeze.columns="no" freeze.rows="no">
+					<LOCATION left="4" top="25" />
+					<CORNER>
+						<SIZE width="-10" height="-10" />
+					</CORNER>
+					<COLUMNS>
+						<BLOCK name="Блок2_Копия2">
+							<TITLE text="Atlist" text.treat="expression">
+								<FORMAT>
+									<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="no" align.linear="" />
+									<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="10" color.choice="black" bold="no" italic="yes" underline="no" />
+									<BORDER>
+										<LEFT border.style="Thin" color.choice="custom" />
+										<RIGHT border.style="Thin" color.choice="custom" />
+										<TOP border.style="Thin" color.choice="custom" />
+										<BOTTOM border.style="Thin" color.choice="custom" />
+										<HORIZONTAL border.style="style" color.choice="style" />
+										<VERTICAL border.style="Thin" color.choice="style" />
+									</BORDER>
+									<FILL overlap="style" pattern="Solid">
+										<BACKGROUND color.choice="custom" color.custom="FFFFFF" />
+										<FOREGROUND color.choice="style" />
+									</FILL>
+								</FORMAT>
+							</TITLE>
+							<SIZE width="21.5" height="6.999999" />
+							<DIMENSION instantiation="List({Бизнес-объект}:{time})" />
+						</BLOCK>
+					</COLUMNS>
+					<ROWS>
+						<BLOCK name="Блок2">
+							<TITLE text="Atlist" text.treat="expression">
+								<FORMAT>
+									<TEXT wrap="yes" fit="no" orientation.choice="custom" align.horizontal="left" align.vertical="center" auto.fit="yes" align.linear="" />
+									<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="9" color.choice="black" bold="no" italic="no" underline="no" />
+									<BORDER>
+										<LEFT border.style="Thin" color.choice="style" />
+										<RIGHT border.style="Thin" color.choice="style" />
+										<TOP border.style="Thin" color.choice="custom" />
+										<BOTTOM border.style="Thin" color.choice="custom" />
+										<HORIZONTAL border.style="Thin" color.choice="style" />
+										<VERTICAL border.style="style" color.choice="style" />
+									</BORDER>
+									<FILL overlap="style" pattern="Solid">
+										<BACKGROUND color.choice="custom" color.custom="FFFFFF" />
+										<FOREGROUND color.choice="style" />
+									</FILL>
+									<NUMBER choice="custom" custom="General" />
+								</FORMAT>
+							</TITLE>
+							<SIZE width="92" height="5.250001" />
+							<DIMENSION instantiation="List({Бизнес-объект}:{desc})">
+								<SORT />
+							</DIMENSION>
+							<DATA filter="Comp({Бизнес-объект}:{obj}, eq, 'AGT')" />
+						</BLOCK>
+					</ROWS>
+					<GRID>
+						<GTR>
+							<GTD>
+								<FORMAT>
+									<BORDER>
+										<LEFT border.style="style" color.choice="style" />
+										<RIGHT border.style="Thin" color.choice="custom" />
+										<TOP border.style="style" color.choice="style" />
+										<BOTTOM border.style="Thin" color.choice="custom" />
+										<HORIZONTAL border.style="style" color.choice="style" />
+										<VERTICAL border.style="style" color.choice="style" />
+									</BORDER>
+									<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="12" color.choice="black" bold="no" italic="yes" underline="no" />
+									<TEXT wrap="yes" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="no" align.linear="" />
+									<FILL overlap="style" pattern="style">
+										<BACKGROUND color.choice="style" />
+										<FOREGROUND color.choice="style" />
+									</FILL>
+								</FORMAT>
+								<VALUES />
+								<DATA expression="val({Бизнес-объект}:{val})" />
+								<CONDITIONAL.FORMATS>
+									<CONDITIONAL.FORMAT condition="val({Бизнес-объект}:{qual})&lt;192">
+										<FORMAT>
+											<BORDER>
+												<LEFT border.style="style" color.choice="style" />
+												<RIGHT border.style="style" color.choice="style" />
+												<TOP border.style="style" color.choice="style" />
+												<BOTTOM border.style="style" color.choice="style" />
+											</BORDER>
+											<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="style" align.linear="" />
+											<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="12" color.choice="custom" color.custom="33CCCC" bold="no" italic="yes" underline="no" />
+											<FILL overlap="style" pattern="style">
+												<BACKGROUND color.choice="style" />
+												<FOREGROUND color.choice="style" />
+											</FILL>
+										</FORMAT>
+									</CONDITIONAL.FORMAT>
+								</CONDITIONAL.FORMATS>
+							</GTD>
+						</GTR>
+					</GRID>
+				</TABLE>
+				<LABEL name="ап_Копия1" text="Агрегаты" text.treat="plain" repeat="yes" align.top="no" align.bottom="no" align.right="no" align.left="yes">
+					<LOCATION left="4.25" top="18.75" />
+					<SIZE width="41.25" height="5" />
+					<FORMAT>
+						<TEXT wrap="no" fit="yes" orientation.choice="custom" align.horizontal="left" align.vertical="center" auto.fit="no" align.linear="" />
+						<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="10" color.choice="black" bold="yes" italic="no" underline="no" />
+						<FILL overlap="style" pattern="style">
+							<BACKGROUND color.choice="style" />
+							<FOREGROUND color.choice="style" />
+						</FILL>
+						<BORDER>
+							<LEFT border.style="none" color.choice="auto" />
+							<RIGHT border.style="none" color.choice="auto" />
+							<TOP border.style="none" color.choice="auto" />
+							<BOTTOM border.style="none" color.choice="auto" />
+							<HORIZONTAL border.style="style" color.choice="style" />
+							<VERTICAL border.style="style" color.choice="style" />
+						</BORDER>
+					</FORMAT>
+				</LABEL>
+			</CONTENT>
+			<SIZE width="210" height="297" />
+			<VALUES />
+			<DATA />
+			<DIMENSION />
+		</PAGE>
+		<PAGE name="Запорная_арматура" sheet.name="Запорная_арматура" sheet.name.treat="plain" orientation="portrait" margin.top="4" margin.bottom="4" margin.left="4" margin.right="4" zoom="100">
+			<CONTENT>
+				<LABEL name="Шапка" text="Concat('Историческая двухчасовая сводка по технологическим параметрам за сутки ', ${День_сводки})" text.treat="expression" repeat="yes" align.top="no" align.bottom="no" align.right="no" align.left="no">
+					<LOCATION left="4" top="4" />
+					<SIZE width="196.25" height="6.25" />
+					<FORMAT>
+						<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="12" color.choice="black" bold="yes" italic="no" underline="no" />
+						<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="no" align.linear="" />
+						<FILL overlap="style" pattern="style">
+							<BACKGROUND color.choice="style" />
+							<FOREGROUND color.choice="style" />
+						</FILL>
+						<BORDER>
+							<LEFT border.style="style" color.choice="style" />
+							<RIGHT border.style="style" color.choice="style" />
+							<TOP border.style="style" color.choice="style" />
+							<BOTTOM border.style="style" color.choice="style" />
+							<HORIZONTAL border.style="style" color.choice="style" />
+							<VERTICAL border.style="style" color.choice="style" />
+						</BORDER>
+					</FORMAT>
+				</LABEL>
+				<LABEL name="Дата" text="Concat('Сформирован ', DateTimeToString(Now,'dd.MM.yyyy HH:mm:ss'))" text.treat="expression" repeat="yes" align.top="no" align.bottom="no" align.right="no" align.left="yes">
+					<LOCATION left="4" top="10.5" />
+					<SIZE width="158" height="6" />
+					<FORMAT>
+						<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="11" color.choice="black" bold="yes" italic="no" underline="no" />
+						<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="left" align.vertical="center" auto.fit="no" align.linear="" />
+						<FILL overlap="style" pattern="style">
+							<BACKGROUND color.choice="style" />
+							<FOREGROUND color.choice="style" />
+						</FILL>
+						<BORDER>
+							<LEFT border.style="style" color.choice="style" />
+							<RIGHT border.style="style" color.choice="style" />
+							<TOP border.style="style" color.choice="style" />
+							<BOTTOM border.style="style" color.choice="style" />
+							<HORIZONTAL border.style="style" color.choice="style" />
+							<VERTICAL border.style="style" color.choice="style" />
+						</BORDER>
+					</FORMAT>
+				</LABEL>
+				<TABLE name="Таблица1_Копия1_Копия1" freeze.columns="no" freeze.rows="no">
+					<LOCATION left="4" top="25" />
+					<CORNER>
+						<SIZE width="-10" height="-10" />
+					</CORNER>
+					<COLUMNS>
+						<BLOCK name="Блок2_Копия2">
+							<TITLE text="Atlist" text.treat="expression">
+								<FORMAT>
+									<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="no" align.linear="" />
+									<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="10" color.choice="black" bold="no" italic="yes" underline="no" />
+									<BORDER>
+										<LEFT border.style="Thin" color.choice="custom" />
+										<RIGHT border.style="Thin" color.choice="custom" />
+										<TOP border.style="Thin" color.choice="custom" />
+										<BOTTOM border.style="Thin" color.choice="custom" />
+										<HORIZONTAL border.style="style" color.choice="style" />
+										<VERTICAL border.style="Thin" color.choice="style" />
+									</BORDER>
+									<FILL overlap="style" pattern="Solid">
+										<BACKGROUND color.choice="custom" color.custom="FFFFFF" />
+										<FOREGROUND color.choice="style" />
+									</FILL>
+								</FORMAT>
+							</TITLE>
+							<SIZE width="13.75" height="6.999999" />
+							<DIMENSION instantiation="List({Бизнес-объект}:{time})" />
+						</BLOCK>
+					</COLUMNS>
+					<ROWS>
+						<BLOCK name="Блок2">
+							<TITLE text="Atlist" text.treat="expression">
+								<FORMAT>
+									<TEXT wrap="yes" fit="no" orientation.choice="custom" align.horizontal="left" align.vertical="center" auto.fit="yes" align.linear="" />
+									<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="9" color.choice="black" bold="no" italic="no" underline="no" />
+									<BORDER>
+										<LEFT border.style="Thin" color.choice="style" />
+										<RIGHT border.style="Thin" color.choice="style" />
+										<TOP border.style="Thin" color.choice="custom" />
+										<BOTTOM border.style="Thin" color.choice="custom" />
+										<HORIZONTAL border.style="Thin" color.choice="style" />
+										<VERTICAL border.style="style" color.choice="style" />
+									</BORDER>
+									<FILL overlap="style" pattern="Solid">
+										<BACKGROUND color.choice="custom" color.custom="FFFFFF" />
+										<FOREGROUND color.choice="style" />
+									</FILL>
+									<NUMBER choice="custom" custom="General" />
+								</FORMAT>
+							</TITLE>
+							<SIZE width="107.5" height="5.250001" />
+							<DIMENSION instantiation="List({Бизнес-объект}:{desc})">
+								<SORT />
+							</DIMENSION>
+							<DATA filter="or(Comp({Бизнес-объект}:{obj}, eq, 'VLV'),Comp({Бизнес-объект}:{obj}, eq, 'REG'))" />
+						</BLOCK>
+					</ROWS>
+					<GRID>
+						<GTR>
+							<GTD>
+								<FORMAT>
+									<BORDER>
+										<LEFT border.style="style" color.choice="style" />
+										<RIGHT border.style="Thin" color.choice="custom" />
+										<TOP border.style="Thin" color.choice="custom" />
+										<BOTTOM border.style="Thin" color.choice="custom" />
+										<HORIZONTAL border.style="style" color.choice="style" />
+										<VERTICAL border.style="style" color.choice="style" />
+									</BORDER>
+									<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="12" color.choice="black" bold="no" italic="yes" underline="no" />
+									<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="no" align.linear="" />
+									<FILL overlap="style" pattern="style">
+										<BACKGROUND color.choice="style" />
+										<FOREGROUND color.choice="style" />
+									</FILL>
+								</FORMAT>
+								<VALUES />
+								<DATA expression="val({Бизнес-объект}:{val})" />
+								<CONDITIONAL.FORMATS>
+									<CONDITIONAL.FORMAT condition="val({Бизнес-объект}:{qual})&lt;192">
+										<FORMAT>
+											<BORDER>
+												<LEFT border.style="style" color.choice="style" />
+												<RIGHT border.style="style" color.choice="style" />
+												<TOP border.style="style" color.choice="style" />
+												<BOTTOM border.style="style" color.choice="style" />
+											</BORDER>
+											<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="style" align.linear="" />
+											<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="12" color.choice="custom" color.custom="33CCCC" bold="no" italic="yes" underline="no" />
+											<FILL overlap="style" pattern="style">
+												<BACKGROUND color.choice="style" />
+												<FOREGROUND color.choice="style" />
+											</FILL>
+										</FORMAT>
+									</CONDITIONAL.FORMAT>
+								</CONDITIONAL.FORMATS>
+							</GTD>
+						</GTR>
+					</GRID>
+				</TABLE>
+				<LABEL name="ап_Копия1_Копия1" text="Запорная арматура" text.treat="plain" repeat="yes" align.top="no" align.bottom="no" align.right="no" align.left="yes">
+					<LOCATION left="4.25" top="18.75" />
+					<SIZE width="41.25" height="5" />
+					<FORMAT>
+						<TEXT wrap="no" fit="yes" orientation.choice="custom" align.horizontal="left" align.vertical="center" auto.fit="no" align.linear="" />
+						<FONT name.choice="windows" name.windows="Arial" size.choice="custom" size.custom="10" color.choice="black" bold="yes" italic="no" underline="no" />
+						<FILL overlap="style" pattern="style">
+							<BACKGROUND color.choice="style" />
+							<FOREGROUND color.choice="style" />
+						</FILL>
+						<BORDER>
+							<LEFT border.style="none" color.choice="auto" />
+							<RIGHT border.style="none" color.choice="auto" />
+							<TOP border.style="none" color.choice="auto" />
+							<BOTTOM border.style="none" color.choice="auto" />
+							<HORIZONTAL border.style="style" color.choice="style" />
+							<VERTICAL border.style="style" color.choice="style" />
+						</BORDER>
+					</FORMAT>
+				</LABEL>
+			</CONTENT>
+			<SIZE width="210" height="297" />
+			<VALUES />
+			<DATA />
+			<DIMENSION />
+		</PAGE>
+	</PAGES>
+	<PARAMS>
+		<PARAM name="День_сводки" user.hidden="yes" value="05/25/2018" type="DATE" />
+	</PARAMS>
+</REPORT>
+			</data>
+		</template>
+		<template key="2727" name="Шаблон Оперативная сводка" comment="" created="5/25/2018 11:12:14 AM" createdBy="PLANT\shav" format="Excel">
+			<refs>
+				<folder key="2666" />
+				<bizView key="2670" />
+				<defaultMapping key="2726" />
+			</refs>
+			<data>
+				<REPORT name="Шаблон" version="3.1" break.vertical="no" break.horizontal="no">
+	<PAGES>
+		<PAGE name="Аналоговые_параметры" sheet.name="Аналоговые_параметры" sheet.name.treat="plain" orientation="portrait" margin.top="4" margin.bottom="4" margin.left="4" margin.right="4" zoom="100">
+			<CONTENT>
+				<LABEL name="Шапка" text="Оперативная сводка по технологическим параметрам" text.treat="plain" repeat="yes" align.top="no" align.bottom="no" align.right="no" align.left="no">
+					<LOCATION left="4" top="4" />
+					<SIZE width="196.25" height="6.25" />
+					<FORMAT>
+						<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="12" color.choice="black" bold="yes" italic="no" underline="no" />
+						<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="no" align.linear="" />
+						<FILL overlap="style" pattern="style">
+							<BACKGROUND color.choice="style" />
+							<FOREGROUND color.choice="style" />
+						</FILL>
+						<BORDER>
+							<LEFT border.style="style" color.choice="style" />
+							<RIGHT border.style="style" color.choice="style" />
+							<TOP border.style="style" color.choice="style" />
+							<BOTTOM border.style="style" color.choice="style" />
+							<HORIZONTAL border.style="style" color.choice="style" />
+							<VERTICAL border.style="style" color.choice="style" />
+						</BORDER>
+					</FORMAT>
+				</LABEL>
+				<LABEL name="Дата" text="Concat('Сформирован ', DateTimeToString(Now,'dd.MM.yyyy HH:mm:ss'))" text.treat="expression" repeat="yes" align.top="no" align.bottom="no" align.right="no" align.left="yes">
+					<LOCATION left="4" top="10.5" />
+					<SIZE width="158" height="6" />
+					<FORMAT>
+						<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="11" color.choice="black" bold="yes" italic="no" underline="no" />
+						<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="left" align.vertical="center" auto.fit="no" align.linear="" />
+						<FILL overlap="style" pattern="style">
+							<BACKGROUND color.choice="style" />
+							<FOREGROUND color.choice="style" />
+						</FILL>
+						<BORDER>
+							<LEFT border.style="style" color.choice="style" />
+							<RIGHT border.style="style" color.choice="style" />
+							<TOP border.style="style" color.choice="style" />
+							<BOTTOM border.style="style" color.choice="style" />
+							<HORIZONTAL border.style="style" color.choice="style" />
+							<VERTICAL border.style="style" color.choice="style" />
+						</BORDER>
+					</FORMAT>
+				</LABEL>
+				<TABLE name="Таблица1" freeze.columns="no" freeze.rows="no">
+					<LOCATION left="4" top="25" />
+					<CORNER>
+						<SIZE width="-10" height="-10" />
+					</CORNER>
+					<COLUMNS>
+						<BLOCK name="Блок2_Копия2">
+							<TITLE text="Значение" text.treat="plain">
+								<FORMAT>
+									<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="no" align.linear="" />
+									<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="10" color.choice="black" bold="no" italic="yes" underline="no" />
+									<BORDER>
+										<LEFT border.style="Thin" color.choice="style" />
+										<RIGHT border.style="Thin" color.choice="custom" />
+										<TOP border.style="Thin" color.choice="custom" />
+										<BOTTOM border.style="Thin" color.choice="custom" />
+										<HORIZONTAL border.style="style" color.choice="style" />
+										<VERTICAL border.style="Thin" color.choice="style" />
+									</BORDER>
+									<FILL overlap="style" pattern="Solid">
+										<BACKGROUND color.choice="custom" color.custom="FFFFFF" />
+										<FOREGROUND color.choice="style" />
+									</FILL>
+								</FORMAT>
+							</TITLE>
+							<SIZE width="18.5" height="6.999999" />
+						</BLOCK>
+					</COLUMNS>
+					<ROWS>
+						<BLOCK name="Блок2">
+							<TITLE text="Atlist" text.treat="expression">
+								<FORMAT>
+									<TEXT wrap="yes" fit="no" orientation.choice="custom" align.horizontal="left" align.vertical="center" auto.fit="yes" align.linear="" />
+									<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="9" color.choice="black" bold="no" italic="no" underline="no" />
+									<BORDER>
+										<LEFT border.style="Thin" color.choice="style" />
+										<RIGHT border.style="Thin" color.choice="style" />
+										<TOP border.style="Thin" color.choice="custom" />
+										<BOTTOM border.style="Thin" color.choice="custom" />
+										<HORIZONTAL border.style="Thin" color.choice="style" />
+										<VERTICAL border.style="style" color.choice="style" />
+									</BORDER>
+									<FILL overlap="style" pattern="Solid">
+										<BACKGROUND color.choice="custom" color.custom="FFFFFF" />
+										<FOREGROUND color.choice="style" />
+									</FILL>
+									<NUMBER choice="custom" custom="General" />
+								</FORMAT>
+							</TITLE>
+							<SIZE width="133.75" height="5.250001" />
+							<DIMENSION instantiation="List({Бизнес-объект}:{desc})">
+								<SORT />
+							</DIMENSION>
+							<DATA filter="or(Comp({Бизнес-объект}:{obj}, eq, 'AP'),Comp({Бизнес-объект}:{obj}, eq, 'AP1H'))" />
+						</BLOCK>
+					</ROWS>
+					<GRID>
+						<GTR>
+							<GTD>
+								<FORMAT>
+									<BORDER>
+										<LEFT border.style="style" color.choice="style" />
+										<RIGHT border.style="Thin" color.choice="custom" />
+										<TOP border.style="Thin" color.choice="custom" />
+										<BOTTOM border.style="Thin" color.choice="custom" />
+										<HORIZONTAL border.style="style" color.choice="style" />
+										<VERTICAL border.style="style" color.choice="style" />
+									</BORDER>
+									<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="12" color.choice="black" bold="no" italic="yes" underline="no" />
+									<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="no" align.linear="" />
+									<FILL overlap="style" pattern="style">
+										<BACKGROUND color.choice="style" />
+										<FOREGROUND color.choice="style" />
+									</FILL>
+								</FORMAT>
+								<VALUES />
+								<DATA expression="val({Бизнес-объект}:{val})" />
+								<CONDITIONAL.FORMATS>
+									<CONDITIONAL.FORMAT condition="val({Бизнес-объект}:{qual})&lt;192">
+										<FORMAT>
+											<BORDER>
+												<LEFT border.style="style" color.choice="style" />
+												<RIGHT border.style="style" color.choice="style" />
+												<TOP border.style="style" color.choice="style" />
+												<BOTTOM border.style="style" color.choice="style" />
+											</BORDER>
+											<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="style" align.linear="" />
+											<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="12" color.choice="custom" color.custom="33CCCC" bold="no" italic="yes" underline="no" />
+											<FILL overlap="style" pattern="style">
+												<BACKGROUND color.choice="style" />
+												<FOREGROUND color.choice="style" />
+											</FILL>
+										</FORMAT>
+									</CONDITIONAL.FORMAT>
+								</CONDITIONAL.FORMATS>
+							</GTD>
+						</GTR>
+					</GRID>
+				</TABLE>
+				<LABEL name="ап" text="Аналоговые параметры" text.treat="plain" repeat="yes" align.top="no" align.bottom="no" align.right="no" align.left="yes">
+					<LOCATION left="4" top="18.75" />
+					<SIZE width="41.25" height="5" />
+					<FORMAT>
+						<TEXT wrap="no" fit="yes" orientation.choice="custom" align.horizontal="left" align.vertical="center" auto.fit="no" align.linear="" />
+						<FONT name.choice="windows" name.windows="Arial" size.choice="custom" size.custom="10" color.choice="black" bold="yes" italic="no" underline="no" />
+						<FILL overlap="style" pattern="style">
+							<BACKGROUND color.choice="style" />
+							<FOREGROUND color.choice="style" />
+						</FILL>
+						<BORDER>
+							<LEFT border.style="none" color.choice="auto" />
+							<RIGHT border.style="none" color.choice="auto" />
+							<TOP border.style="none" color.choice="auto" />
+							<BOTTOM border.style="none" color.choice="auto" />
+							<HORIZONTAL border.style="style" color.choice="style" />
+							<VERTICAL border.style="style" color.choice="style" />
+						</BORDER>
+					</FORMAT>
+				</LABEL>
+			</CONTENT>
+			<SIZE width="210" height="297" />
+			<VALUES />
+			<DATA />
+			<DIMENSION />
+		</PAGE>
+		<PAGE name="Агрегаты" sheet.name="Агрегаты" sheet.name.treat="plain" orientation="portrait" margin.top="4" margin.bottom="4" margin.left="4" margin.right="4" zoom="100">
+			<CONTENT>
+				<LABEL name="Шапка" text="Оперативная сводка по технологическим параметрам" text.treat="plain" repeat="yes" align.top="no" align.bottom="no" align.right="no" align.left="no">
+					<LOCATION left="4" top="4" />
+					<SIZE width="196.25" height="6.25" />
+					<FORMAT>
+						<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="12" color.choice="black" bold="yes" italic="no" underline="no" />
+						<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="no" align.linear="" />
+						<FILL overlap="style" pattern="style">
+							<BACKGROUND color.choice="style" />
+							<FOREGROUND color.choice="style" />
+						</FILL>
+						<BORDER>
+							<LEFT border.style="style" color.choice="style" />
+							<RIGHT border.style="style" color.choice="style" />
+							<TOP border.style="style" color.choice="style" />
+							<BOTTOM border.style="style" color.choice="style" />
+							<HORIZONTAL border.style="style" color.choice="style" />
+							<VERTICAL border.style="style" color.choice="style" />
+						</BORDER>
+					</FORMAT>
+				</LABEL>
+				<LABEL name="Дата" text="Concat('Сформирован ', DateTimeToString(Now,'dd.MM.yyyy HH:mm:ss'))" text.treat="expression" repeat="yes" align.top="no" align.bottom="no" align.right="no" align.left="yes">
+					<LOCATION left="4" top="10.5" />
+					<SIZE width="158" height="6" />
+					<FORMAT>
+						<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="11" color.choice="black" bold="yes" italic="no" underline="no" />
+						<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="left" align.vertical="center" auto.fit="no" align.linear="" />
+						<FILL overlap="style" pattern="style">
+							<BACKGROUND color.choice="style" />
+							<FOREGROUND color.choice="style" />
+						</FILL>
+						<BORDER>
+							<LEFT border.style="style" color.choice="style" />
+							<RIGHT border.style="style" color.choice="style" />
+							<TOP border.style="style" color.choice="style" />
+							<BOTTOM border.style="style" color.choice="style" />
+							<HORIZONTAL border.style="style" color.choice="style" />
+							<VERTICAL border.style="style" color.choice="style" />
+						</BORDER>
+					</FORMAT>
+				</LABEL>
+				<TABLE name="Таблица1_Копия1" freeze.columns="no" freeze.rows="no">
+					<LOCATION left="4" top="25" />
+					<CORNER>
+						<SIZE width="-10" height="-10" />
+					</CORNER>
+					<COLUMNS>
+						<BLOCK name="Блок2_Копия2">
+							<TITLE text="Состояние" text.treat="plain">
+								<FORMAT>
+									<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="no" align.linear="" />
+									<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="10" color.choice="black" bold="no" italic="yes" underline="no" />
+									<BORDER>
+										<LEFT border.style="Thin" color.choice="custom" />
+										<RIGHT border.style="Thin" color.choice="custom" />
+										<TOP border.style="Thin" color.choice="custom" />
+										<BOTTOM border.style="Thin" color.choice="custom" />
+										<HORIZONTAL border.style="style" color.choice="style" />
+										<VERTICAL border.style="Thin" color.choice="style" />
+									</BORDER>
+									<FILL overlap="style" pattern="Solid">
+										<BACKGROUND color.choice="custom" color.custom="FFFFFF" />
+										<FOREGROUND color.choice="style" />
+									</FILL>
+								</FORMAT>
+							</TITLE>
+							<SIZE width="74" height="6.999999" />
+						</BLOCK>
+					</COLUMNS>
+					<ROWS>
+						<BLOCK name="Блок2">
+							<TITLE text="Atlist" text.treat="expression">
+								<FORMAT>
+									<TEXT wrap="yes" fit="no" orientation.choice="custom" align.horizontal="left" align.vertical="center" auto.fit="yes" align.linear="" />
+									<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="9" color.choice="black" bold="no" italic="no" underline="no" />
+									<BORDER>
+										<LEFT border.style="Thin" color.choice="style" />
+										<RIGHT border.style="Thin" color.choice="style" />
+										<TOP border.style="Thin" color.choice="custom" />
+										<BOTTOM border.style="Thin" color.choice="custom" />
+										<HORIZONTAL border.style="Thin" color.choice="style" />
+										<VERTICAL border.style="style" color.choice="style" />
+									</BORDER>
+									<FILL overlap="style" pattern="Solid">
+										<BACKGROUND color.choice="custom" color.custom="FFFFFF" />
+										<FOREGROUND color.choice="style" />
+									</FILL>
+									<NUMBER choice="custom" custom="General" />
+								</FORMAT>
+							</TITLE>
+							<SIZE width="92" height="5.250001" />
+							<DIMENSION instantiation="List({Бизнес-объект}:{desc})">
+								<SORT />
+							</DIMENSION>
+							<DATA filter="Comp({Бизнес-объект}:{obj}, eq, 'AGT')" />
+						</BLOCK>
+					</ROWS>
+					<GRID>
+						<GTR>
+							<GTD>
+								<FORMAT>
+									<BORDER>
+										<LEFT border.style="style" color.choice="style" />
+										<RIGHT border.style="Thin" color.choice="custom" />
+										<TOP border.style="style" color.choice="style" />
+										<BOTTOM border.style="Thin" color.choice="custom" />
+										<HORIZONTAL border.style="style" color.choice="style" />
+										<VERTICAL border.style="style" color.choice="style" />
+									</BORDER>
+									<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="12" color.choice="black" bold="no" italic="yes" underline="no" />
+									<TEXT wrap="yes" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="no" align.linear="" />
+									<FILL overlap="style" pattern="style">
+										<BACKGROUND color.choice="style" />
+										<FOREGROUND color.choice="style" />
+									</FILL>
+								</FORMAT>
+								<VALUES />
+								<DATA expression="val({Бизнес-объект}:{val})" />
+								<CONDITIONAL.FORMATS>
+									<CONDITIONAL.FORMAT condition="val({Бизнес-объект}:{qual})&lt;192">
+										<FORMAT>
+											<BORDER>
+												<LEFT border.style="style" color.choice="style" />
+												<RIGHT border.style="style" color.choice="style" />
+												<TOP border.style="style" color.choice="style" />
+												<BOTTOM border.style="style" color.choice="style" />
+											</BORDER>
+											<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="style" align.linear="" />
+											<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="12" color.choice="custom" color.custom="33CCCC" bold="no" italic="yes" underline="no" />
+											<FILL overlap="style" pattern="style">
+												<BACKGROUND color.choice="style" />
+												<FOREGROUND color.choice="style" />
+											</FILL>
+										</FORMAT>
+									</CONDITIONAL.FORMAT>
+								</CONDITIONAL.FORMATS>
+							</GTD>
+						</GTR>
+					</GRID>
+				</TABLE>
+				<LABEL name="ап_Копия1" text="Агрегаты" text.treat="plain" repeat="yes" align.top="no" align.bottom="no" align.right="no" align.left="yes">
+					<LOCATION left="4.25" top="18.75" />
+					<SIZE width="41.25" height="5" />
+					<FORMAT>
+						<TEXT wrap="no" fit="yes" orientation.choice="custom" align.horizontal="left" align.vertical="center" auto.fit="no" align.linear="" />
+						<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="10" color.choice="black" bold="yes" italic="no" underline="no" />
+						<FILL overlap="style" pattern="style">
+							<BACKGROUND color.choice="style" />
+							<FOREGROUND color.choice="style" />
+						</FILL>
+						<BORDER>
+							<LEFT border.style="none" color.choice="auto" />
+							<RIGHT border.style="none" color.choice="auto" />
+							<TOP border.style="none" color.choice="auto" />
+							<BOTTOM border.style="none" color.choice="auto" />
+							<HORIZONTAL border.style="style" color.choice="style" />
+							<VERTICAL border.style="style" color.choice="style" />
+						</BORDER>
+					</FORMAT>
+				</LABEL>
+			</CONTENT>
+			<SIZE width="210" height="297" />
+			<VALUES />
+			<DATA />
+			<DIMENSION />
+		</PAGE>
+		<PAGE name="Запорная_арматура" sheet.name="Запорная_арматура" sheet.name.treat="plain" orientation="portrait" margin.top="4" margin.bottom="4" margin.left="4" margin.right="4" zoom="100">
+			<CONTENT>
+				<LABEL name="Шапка" text="Оперативная сводка по технологическим параметрам" text.treat="plain" repeat="yes" align.top="no" align.bottom="no" align.right="no" align.left="no">
+					<LOCATION left="4" top="4" />
+					<SIZE width="196.25" height="6.25" />
+					<FORMAT>
+						<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="12" color.choice="black" bold="yes" italic="no" underline="no" />
+						<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="no" align.linear="" />
+						<FILL overlap="style" pattern="style">
+							<BACKGROUND color.choice="style" />
+							<FOREGROUND color.choice="style" />
+						</FILL>
+						<BORDER>
+							<LEFT border.style="style" color.choice="style" />
+							<RIGHT border.style="style" color.choice="style" />
+							<TOP border.style="style" color.choice="style" />
+							<BOTTOM border.style="style" color.choice="style" />
+							<HORIZONTAL border.style="style" color.choice="style" />
+							<VERTICAL border.style="style" color.choice="style" />
+						</BORDER>
+					</FORMAT>
+				</LABEL>
+				<LABEL name="Дата" text="Concat('Сформирован ', DateTimeToString(Now,'dd.MM.yyyy HH:mm:ss'))" text.treat="expression" repeat="yes" align.top="no" align.bottom="no" align.right="no" align.left="yes">
+					<LOCATION left="4" top="10.5" />
+					<SIZE width="158" height="6" />
+					<FORMAT>
+						<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="11" color.choice="black" bold="yes" italic="no" underline="no" />
+						<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="left" align.vertical="center" auto.fit="no" align.linear="" />
+						<FILL overlap="style" pattern="style">
+							<BACKGROUND color.choice="style" />
+							<FOREGROUND color.choice="style" />
+						</FILL>
+						<BORDER>
+							<LEFT border.style="style" color.choice="style" />
+							<RIGHT border.style="style" color.choice="style" />
+							<TOP border.style="style" color.choice="style" />
+							<BOTTOM border.style="style" color.choice="style" />
+							<HORIZONTAL border.style="style" color.choice="style" />
+							<VERTICAL border.style="style" color.choice="style" />
+						</BORDER>
+					</FORMAT>
+				</LABEL>
+				<TABLE name="Таблица1_Копия1_Копия1" freeze.columns="no" freeze.rows="no">
+					<LOCATION left="4" top="25" />
+					<CORNER>
+						<SIZE width="-10" height="-10" />
+					</CORNER>
+					<COLUMNS>
+						<BLOCK name="Блок2_Копия2">
+							<TITLE text="Состояние" text.treat="plain">
+								<FORMAT>
+									<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="no" align.linear="" />
+									<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="10" color.choice="black" bold="no" italic="yes" underline="no" />
+									<BORDER>
+										<LEFT border.style="Thin" color.choice="custom" />
+										<RIGHT border.style="Thin" color.choice="custom" />
+										<TOP border.style="Thin" color.choice="custom" />
+										<BOTTOM border.style="Thin" color.choice="custom" />
+										<HORIZONTAL border.style="style" color.choice="style" />
+										<VERTICAL border.style="Thin" color.choice="style" />
+									</BORDER>
+									<FILL overlap="style" pattern="Solid">
+										<BACKGROUND color.choice="custom" color.custom="FFFFFF" />
+										<FOREGROUND color.choice="style" />
+									</FILL>
+								</FORMAT>
+							</TITLE>
+							<SIZE width="53.25" height="6.999999" />
+						</BLOCK>
+					</COLUMNS>
+					<ROWS>
+						<BLOCK name="Блок2">
+							<TITLE text="Atlist" text.treat="expression">
+								<FORMAT>
+									<TEXT wrap="yes" fit="no" orientation.choice="custom" align.horizontal="left" align.vertical="center" auto.fit="yes" align.linear="" />
+									<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="9" color.choice="black" bold="no" italic="no" underline="no" />
+									<BORDER>
+										<LEFT border.style="Thin" color.choice="style" />
+										<RIGHT border.style="Thin" color.choice="style" />
+										<TOP border.style="Thin" color.choice="custom" />
+										<BOTTOM border.style="Thin" color.choice="custom" />
+										<HORIZONTAL border.style="Thin" color.choice="style" />
+										<VERTICAL border.style="style" color.choice="style" />
+									</BORDER>
+									<FILL overlap="style" pattern="Solid">
+										<BACKGROUND color.choice="custom" color.custom="FFFFFF" />
+										<FOREGROUND color.choice="style" />
+									</FILL>
+									<NUMBER choice="custom" custom="General" />
+								</FORMAT>
+							</TITLE>
+							<SIZE width="107.5" height="5.250001" />
+							<DIMENSION instantiation="List({Бизнес-объект}:{desc})">
+								<SORT />
+							</DIMENSION>
+							<DATA filter="or(Comp({Бизнес-объект}:{obj}, eq, 'VLV'),Comp({Бизнес-объект}:{obj}, eq, 'REG'))" />
+						</BLOCK>
+					</ROWS>
+					<GRID>
+						<GTR>
+							<GTD>
+								<FORMAT>
+									<BORDER>
+										<LEFT border.style="style" color.choice="style" />
+										<RIGHT border.style="Thin" color.choice="custom" />
+										<TOP border.style="Thin" color.choice="custom" />
+										<BOTTOM border.style="Thin" color.choice="custom" />
+										<HORIZONTAL border.style="style" color.choice="style" />
+										<VERTICAL border.style="style" color.choice="style" />
+									</BORDER>
+									<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="12" color.choice="black" bold="no" italic="yes" underline="no" />
+									<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="no" align.linear="" />
+									<FILL overlap="style" pattern="style">
+										<BACKGROUND color.choice="style" />
+										<FOREGROUND color.choice="style" />
+									</FILL>
+								</FORMAT>
+								<VALUES />
+								<DATA expression="val({Бизнес-объект}:{val})" />
+								<CONDITIONAL.FORMATS>
+									<CONDITIONAL.FORMAT condition="val({Бизнес-объект}:{qual})&lt;192">
+										<FORMAT>
+											<BORDER>
+												<LEFT border.style="style" color.choice="style" />
+												<RIGHT border.style="style" color.choice="style" />
+												<TOP border.style="style" color.choice="style" />
+												<BOTTOM border.style="style" color.choice="style" />
+											</BORDER>
+											<TEXT wrap="no" fit="no" orientation.choice="custom" align.horizontal="center" align.vertical="center" auto.fit="style" align.linear="" />
+											<FONT name.choice="windows" name.windows="Times New Roman" size.choice="custom" size.custom="12" color.choice="custom" color.custom="33CCCC" bold="no" italic="yes" underline="no" />
+											<FILL overlap="style" pattern="style">
+												<BACKGROUND color.choice="style" />
+												<FOREGROUND color.choice="style" />
+											</FILL>
+										</FORMAT>
+									</CONDITIONAL.FORMAT>
+								</CONDITIONAL.FORMATS>
+							</GTD>
+						</GTR>
+					</GRID>
+				</TABLE>
+				<LABEL name="ап_Копия1_Копия1" text="Запорная арматура" text.treat="plain" repeat="yes" align.top="no" align.bottom="no" align.right="no" align.left="yes">
+					<LOCATION left="4.25" top="18.75" />
+					<SIZE width="41.25" height="5" />
+					<FORMAT>
+						<TEXT wrap="no" fit="yes" orientation.choice="custom" align.horizontal="left" align.vertical="center" auto.fit="no" align.linear="" />
+						<FONT name.choice="windows" name.windows="Arial" size.choice="custom" size.custom="10" color.choice="black" bold="yes" italic="no" underline="no" />
+						<FILL overlap="style" pattern="style">
+							<BACKGROUND color.choice="style" />
+							<FOREGROUND color.choice="style" />
+						</FILL>
+						<BORDER>
+							<LEFT border.style="none" color.choice="auto" />
+							<RIGHT border.style="none" color.choice="auto" />
+							<TOP border.style="none" color.choice="auto" />
+							<BOTTOM border.style="none" color.choice="auto" />
+							<HORIZONTAL border.style="style" color.choice="style" />
+							<VERTICAL border.style="style" color.choice="style" />
+						</BORDER>
+					</FORMAT>
+				</LABEL>
+			</CONTENT>
+			<SIZE width="210" height="297" />
+			<VALUES />
+			<DATA />
+			<DIMENSION />
+		</PAGE>
+	</PAGES>
+</REPORT>
+			</data>
+		</template>
+	</templates>
+	<tasks>
+		<task key="2673" name="Задание Двухчасовая сводка за сутки" comment="" created="5/24/2018 2:13:19 PM" createdBy="PLANT\shav" format="Excel" isValid="False" reportName="Двухчасовая сводка за сутки" reportNamingRule="#NAME#DATE#_#yyyy.MM.dd HH-mm-ss" keyWords="">
+			<refs>
+				<folder key="2666" />
+				<reportFolder key="2666" />
+				<mapping key="2671" />
+				<template key="2672" />
+			</refs>
+			<parameters />
+			<schedules>
+				<schedule created="1/1/0001 12:00:00 AM" createdBy="" isActive="True" scheduleString="Type = Weekly; StartDate = 19.03.2018; EndDate = 01.09.2020; WeekDays = 1; StartTime = 08:20; Interval = 0;" />
+			</schedules>
+			<data>
+				<TASK print="False" zip="False">
+	<BUSINESSPARAMS>
+		<BUSINESSOBJECT id="2669" name="Бизнес-объект">
+			<DATAELEMENT id="78080d32-f3dc-428e-8520-3589416f255b" name="Hist">
+				<PARAMETER id="a314a100-8ea3-4c49-b20b-cf6b27af8cf4" name="Day" value="${День_сводки}" dataType="DATE" editType="SIMPLE" source="06/21/2018" />
+			</DATAELEMENT>
+		</BUSINESSOBJECT>
+	</BUSINESSPARAMS>
+	<DISTRIBUTE />
+</TASK>
+			</data>
+		</task>
+		<task key="2729" name="Задание Оперативная сводка" comment="" created="5/25/2018 11:15:25 AM" createdBy="PLANT\shav" format="Excel" isValid="False" reportName="Оперативная сводка" reportNamingRule="#NAME#DATE#_#yyyy.MM.dd HH-mm-ss" keyWords="">
+			<refs>
+				<folder key="2666" />
+				<reportFolder key="2666" />
+				<mapping key="2726" />
+				<template key="2727" />
+			</refs>
+			<parameters />
+			<schedules />
+			<data>
+				<TASK print="False" zip="False">
+	<BUSINESSPARAMS />
+	<DISTRIBUTE />
+</TASK>
+			</data>
+		</task>
+	</tasks>
+	<styles />
+	<folders>
+		<folder key="2666" name="ТомскАзот" created="1/1/0001 12:00:00 AM" createdBy="" />
+	</folders>
+</repository>
