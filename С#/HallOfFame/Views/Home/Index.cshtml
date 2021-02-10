@@ -1,0 +1,30 @@
+﻿@model IEnumerable<HallOfFame.Models.Skill>
+@{
+    //ViewData["Title"] = "Список навыков";
+    Layout = null;
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Hall Of Fame</title>
+</head>
+<body>
+    <h3>Навыки</h3>
+    <table>
+        <tr>
+            <td>Имя</td>
+            <td>Уровень</td>
+            <td></td>
+        </tr>
+        @foreach (var skill in Model)
+        {
+            <tr>
+                <td>@skill.name</td>
+                <td>@skill.level</td>
+                <td><a href="~/Home/Buy/@skill.id">Купить</a></td>
+            </tr>
+        }
+    </table>
+</body>
+</html>
