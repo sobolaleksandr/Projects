@@ -11,7 +11,5 @@ namespace HallOfFame.Models
         public string name { get; set; }
         public string displayName { get; set; }
         public List<Skill> skills { get; set; }
-
-        //public int SkillId { get; set; }
-}
+    }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+
 
 namespace HallOfFame.Models
 {
@@ -9,6 +8,8 @@ namespace HallOfFame.Models
     {
         public int id { get; set; }
         public string name { get; set; }
+        [Range(1, 10)]
         public byte level { get; set; }
+
     }
 }

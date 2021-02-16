@@ -21,14 +21,14 @@ namespace HallOfFame.Controllers
         }
 
         [Route("api/v1/persons")]
-        [HttpGet]
+        [HttpGet(Name = "GetPersons")]
         public async Task<ActionResult<IEnumerable<Person>>> GetPersons()
-        {           
+        {
             return await _context.Persons.ToArrayAsync();
         }
 
-        [HttpGet("api/v1/person/{id}")]
-        public async Task<ActionResult<Person>> GetPerson(int id)
+        [HttpGet("api/v1/person/{id}", Name = "GetPerson")]
+        public async Task<ActionResult<Person>> Get(int id)
         {
             var person = await _context.Persons.FindAsync(id);
 
@@ -41,9 +41,9 @@ namespace HallOfFame.Controllers
         }
 
         [HttpPost("api/v1/person/{id}")]
-        public async Task<IActionResult> PostPerson(int id, Person person)
+        public async Task<IActionResult> Update(int id, Person person)
         {
-            if (id != person.id)
+            if (id != person.id || person == null)
             {
                 return BadRequest();
             }
@@ -65,24 +65,26 @@ namespace HallOfFame.Controllers
                     throw;
                 }
             }
-            
+
             return Ok();
         }
 
         [Route("api/v1/person")]
         [HttpPut]
-        public async Task<IActionResult> PutPerson(Person person)
+        public async Task<IActionResult> Create([FromBody] Person person)
         {
+            if (person == null )
+            {
+                return BadRequest();
+            }
             _context.Persons.Add(person);
             await _context.SaveChangesAsync();
             CreatedAtAction("GetPerson", new { id = person.id }, person);
             return Ok();
         }
 
-        // DELETE: api/People/5
-        //[Route("person")]
         [HttpDelete("api/v1/person/{id}")]
-        public async Task<IActionResult> DeletePerson(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             var person = await _context.Persons.FindAsync(id);
             if (person == null)

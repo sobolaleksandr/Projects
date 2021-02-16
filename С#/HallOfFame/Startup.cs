@@ -27,8 +27,8 @@ namespace HallOfFame
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<HallOfFameContext>(opt =>
-                                   opt.UseInMemoryDatabase("TodoList"));
+            services.AddDbContext<HallOfFameContext>(options => options.UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"]));
+
             services.AddControllers();
         }
 
