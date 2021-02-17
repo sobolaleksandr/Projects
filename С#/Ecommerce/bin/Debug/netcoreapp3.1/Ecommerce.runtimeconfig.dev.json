@@ -1,0 +1,8 @@
+{
+  "runtimeOptions": {
+    "additionalProbingPaths": [
+      "C:\\Users\\soboav\\.dotnet\\store\\|arch|\\|tfm|",
+      "C:\\Users\\soboav\\.nuget\\packages"
+    ]
+  }
+}
