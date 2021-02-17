@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\u3aya\\source\\repos\\HallOfFame\\HallOfFame.csproj": {}
+    "C:\\Users\\soboav\\Desktop\\Projects\\С#\\HallOfFame\\HallOfFame.csproj": {}
   },
   "projects": {
-    "C:\\Users\\u3aya\\source\\repos\\HallOfFame\\HallOfFame.csproj": {
+    "C:\\Users\\soboav\\Desktop\\Projects\\С#\\HallOfFame\\HallOfFame.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\u3aya\\source\\repos\\HallOfFame\\HallOfFame.csproj",
+        "projectUniqueName": "C:\\Users\\soboav\\Desktop\\Projects\\С#\\HallOfFame\\HallOfFame.csproj",
         "projectName": "HallOfFame",
-        "projectPath": "C:\\Users\\u3aya\\source\\repos\\HallOfFame\\HallOfFame.csproj",
-        "packagesPath": "C:\\Users\\u3aya\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\u3aya\\source\\repos\\HallOfFame\\obj\\",
+        "projectPath": "C:\\Users\\soboav\\Desktop\\Projects\\С#\\HallOfFame\\HallOfFame.csproj",
+        "packagesPath": "C:\\Users\\soboav\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\soboav\\Desktop\\Projects\\С#\\HallOfFame\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\u3aya\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\soboav\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -61,6 +61,10 @@
             "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
               "target": "Package",
               "version": "[3.1.5, )"
+            },
+            "Swashbuckle.AspNetCore": {
+              "target": "Package",
+              "version": "[6.0.7, )"
             }
           },
           "imports": [

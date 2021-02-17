@@ -28,7 +28,7 @@ namespace HallOfFame.Controllers
         }
 
         [HttpGet("api/v1/person/{id}", Name = "GetPerson")]
-        public async Task<ActionResult<Person>> Get(int id)
+        public async Task<ActionResult<Person>> Get(long id)
         {
             var person = await _context.Persons.FindAsync(id);
 
@@ -41,7 +41,7 @@ namespace HallOfFame.Controllers
         }
 
         [HttpPost("api/v1/person/{id}")]
-        public async Task<IActionResult> Update(int id, Person person)
+        public async Task<IActionResult> Update(long id, Person person)
         {
             if (id != person.id || person == null)
             {
@@ -84,7 +84,7 @@ namespace HallOfFame.Controllers
         }
 
         [HttpDelete("api/v1/person/{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(long id)
         {
             var person = await _context.Persons.FindAsync(id);
             if (person == null)
@@ -98,7 +98,7 @@ namespace HallOfFame.Controllers
             return Ok();
         }
 
-        private bool PersonExists(int id)
+        private bool PersonExists(long id)
         {
             return _context.Persons.Any(e => e.id == id);
         }

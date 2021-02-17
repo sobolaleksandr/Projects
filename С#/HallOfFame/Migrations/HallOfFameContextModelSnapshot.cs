@@ -21,9 +21,9 @@ namespace HallOfFame.Migrations
 
             modelBuilder.Entity("HallOfFame.Models.Person", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<long>("id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("displayName")
@@ -39,21 +39,16 @@ namespace HallOfFame.Migrations
 
             modelBuilder.Entity("HallOfFame.Models.Skill", b =>
                 {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<string>("name")
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<int?>("Personid")
-                        .HasColumnType("int");
+                    b.Property<long?>("Personid")
+                        .HasColumnType("bigint");
 
                     b.Property<byte>("level")
                         .HasColumnType("tinyint");
 
-                    b.Property<string>("name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("id");
+                    b.HasKey("name");
 
                     b.HasIndex("Personid");
 

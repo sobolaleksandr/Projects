@@ -10,11 +10,10 @@ namespace HallOfFame.Migrations
                 name: "Persons",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false)
+                    id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    displayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SkillId = table.Column<int>(type: "int", nullable: false)
+                    displayName = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -25,15 +24,13 @@ namespace HallOfFame.Migrations
                 name: "Skills",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    name = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     level = table.Column<byte>(type: "tinyint", nullable: false),
-                    Personid = table.Column<int>(type: "int", nullable: true)
+                    Personid = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Skills", x => x.id);
+                    table.PrimaryKey("PK_Skills", x => x.name);
                     table.ForeignKey(
                         name: "FK_Skills_Persons_Personid",
                         column: x => x.Personid,
