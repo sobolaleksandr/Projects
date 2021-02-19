@@ -15,6 +15,6 @@ namespace Ecommerce.Models
         ErrorMessage = "Некорректный адрес")]
         public string CustomerEmail { get; set; }
         public Customer Customer { get; set; }
-        public List<LineItem> Items { get; set; }//Несколько позиций с продуктами
+        public List<LineBuffer> Items { get; set; }//Несколько позиций с продуктами
     }
 }

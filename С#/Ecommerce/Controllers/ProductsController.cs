@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ecommerce.Models;
+using Ecommerce.ViewModels;
 
 namespace Ecommerce.Controllers
 {
@@ -25,11 +26,10 @@ namespace Ecommerce.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductList>>> GetProducts()
         {
-            var groups = await _context.ProductLists.OrderByDescending(p=>p.Popularity)
+            return await _context.ProductLists
+                .AsNoTracking()
+                .OrderByDescending(p => p.Popularity)
                 .ToListAsync();
-
-            //return await _context.Products.ToListAsync();
-            return groups;
         }
 
         // GET: api/Products/5

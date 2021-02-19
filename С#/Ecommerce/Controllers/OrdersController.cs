@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ecommerce.Models;
+using Ecommerce.ViewModels;
 
 namespace Ecommerce.Controllers
 {
+    [Produces("application/json")]
     [Route("api/[controller]")]
     [ApiController]
     public class OrdersController : ControllerBase
@@ -22,13 +24,17 @@ namespace Ecommerce.Controllers
 
         // GET: api/Orders
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CustomerOrder>>> GetCustomer(decimal sum)
+        //Список клиентов, заказавших товара на сумму, превышающую указанную
+        public async Task<ActionResult<IEnumerable<string>>> GetCustomers(decimal sum)
         {
             var customerOrder =
-                await _context.CustomerOrders.Where(m => m.Sum > sum).ToListAsync();
+                await _context.CustomerInvestments
+                .AsNoTracking()
+                .Where(p=>p.Sum > sum)
+                .Select(p => p.CustomerEmail)
+                .Distinct()
+                .ToListAsync();
 
-            //вывожу всю информацию, а не только список клиентов
-            //в задании не делается акцент, что это должен быть только список клиентов
             return customerOrder;
         }
 
@@ -37,7 +43,10 @@ namespace Ecommerce.Controllers
         public async Task<ActionResult<IEnumerable<CustomerOrder>>> GetCustomer(string id)
         {
             var customerOrder = 
-                await _context.CustomerOrders.Where(m => m.CustomerEmail == id).ToListAsync();
+                await _context.CustomerOrders
+                .AsNoTracking()
+                .Where(m => m.CustomerEmail == id)
+                .ToListAsync();
 
             return customerOrder;
         }
@@ -87,8 +96,14 @@ namespace Ecommerce.Controllers
             customerOrder.OrderNumber = order.Number;
             decimal sum = 0;
 
-            foreach (LineItem item in order.Items)
+            List<LineItem> lineItems = new List<LineItem>();
+
+            foreach (LineBuffer item in order.Items)
             {
+                LineItem lineItem = 
+                    new LineItem { ProductName = item.ProductName, Quantity = item.Quantity};
+                lineItems.Add(lineItem);
+
                 Product product = await _context.Products.FindAsync(item.ProductName);
                 if (product == null)
                 {
@@ -120,17 +135,33 @@ namespace Ecommerce.Controllers
             order.Items = null;
             customerOrder.Sum = sum;
 
+            var _customerInvestment = await _context.CustomerInvestments
+                .Where(p => p.CustomerEmail == customer.Email).FirstOrDefaultAsync();
+
+            if (_customerInvestment == null)
+            {
+                await _context.CustomerInvestments.AddAsync
+                    (new CustomerInvestment { Sum = sum, CustomerEmail = customer.Email});
+            }
+            else
+            {
+                _customerInvestment.Sum += sum;
+                _context.CustomerInvestments.Update(_customerInvestment);
+            }
+
             var _customer = await _context.Customers.FindAsync(customer.Email);
+
             if (_customer != null)
             {
                 order.Customer = null;
             }
 
+            await _context.LineItems.AddRangeAsync(lineItems);
             await _context.Orders.AddAsync(order);
             await _context.CustomerOrders.AddAsync(customerOrder);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetOrder", new { id = order.Id }, order);
+            return Ok();
         }
 
         // DELETE: api/Orders/5
