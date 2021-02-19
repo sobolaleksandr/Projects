@@ -9,6 +9,7 @@ using Ecommerce.Models;
 
 namespace Ecommerce.Controllers
 {
+    [Produces("application/json")]
     [Route("api/[controller]")]
     [ApiController]
     public class ProductsController : ControllerBase
@@ -22,9 +23,13 @@ namespace Ecommerce.Controllers
 
         // GET: api/Products
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
+        public async Task<ActionResult<IEnumerable<ProductList>>> GetProducts()
         {
-            return await _context.Products.ToListAsync();
+            var groups = await _context.ProductLists.OrderByDescending(p=>p.Popularity)
+                .ToListAsync();
+
+            //return await _context.Products.ToListAsync();
+            return groups;
         }
 
         // GET: api/Products/5
@@ -47,7 +52,7 @@ namespace Ecommerce.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProduct(string id, Product product)
         {
-            if (id != product.name)
+            if (id != product.Name)
             {
                 return BadRequest();
             }
@@ -86,7 +91,7 @@ namespace Ecommerce.Controllers
             }
             catch (DbUpdateException)
             {
-                if (ProductExists(product.name))
+                if (ProductExists(product.Name))
                 {
                     return Conflict();
                 }
@@ -96,7 +101,7 @@ namespace Ecommerce.Controllers
                 }
             }
 
-            return CreatedAtAction("GetProduct", new { id = product.name }, product);
+            return CreatedAtAction("GetProduct", new { id = product.Name }, product);
         }
 
         // DELETE: api/Products/5
@@ -117,7 +122,7 @@ namespace Ecommerce.Controllers
 
         private bool ProductExists(string id)
         {
-            return _context.Products.Any(e => e.name == id);
+            return _context.Products.Any(e => e.Name == id);
         }
     }
 }

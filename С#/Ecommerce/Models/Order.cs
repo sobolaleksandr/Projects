@@ -8,11 +8,13 @@ namespace Ecommerce.Models
     public class Order
     {
         [DataType(DataType.Date)]
-        public DateTime created { get; set; }
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int number { get; set; }
-        [Required]
-        public List<LineItem> lineItem { get; set; }
+        public DateTime Created { get; set; }
+        public int Id { get; set; }
+        public int Number { get; set; }
+        [RegularExpression(@"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}",
+        ErrorMessage = "Некорректный адрес")]
+        public string CustomerEmail { get; set; }
+        public Customer Customer { get; set; }
+        public List<LineItem> Items { get; set; }//Несколько позиций с продуктами
     }
 }

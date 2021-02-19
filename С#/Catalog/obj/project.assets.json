@@ -5990,11 +5990,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\soboav\\source\\repos\\Catalog\\Catalog.csproj",
+      "projectUniqueName": "C:\\Users\\soboav\\Desktop\\Projects\\С#\\Catalog\\Catalog.csproj",
       "projectName": "Catalog",
-      "projectPath": "C:\\Users\\soboav\\source\\repos\\Catalog\\Catalog.csproj",
+      "projectPath": "C:\\Users\\soboav\\Desktop\\Projects\\С#\\Catalog\\Catalog.csproj",
       "packagesPath": "C:\\Users\\soboav\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\soboav\\source\\repos\\Catalog\\obj\\",
+      "outputPath": "C:\\Users\\soboav\\Desktop\\Projects\\С#\\Catalog\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\soboav\\AppData\\Roaming\\NuGet\\NuGet.Config",

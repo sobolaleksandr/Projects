@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "ecaV4KatBJdxcmultzA17bInUlpHfcuia7Ygaq0mQFQ6atf45544fdiNTlTcquTnLU4Fx0hGxZkMlcoX5sLMvg==",
+  "dgSpecHash": "JXAu68aQLs0LAmfD72oHUSUFN2je1qOCmvM6YSyeInrtY/SfIxrs+dHWQo5fSKAI4dNgp4TYbtx8btoxHNUvAg==",
   "success": true,
-  "projectFilePath": "C:\\Users\\soboav\\source\\repos\\Catalog\\Catalog.csproj",
+  "projectFilePath": "C:\\Users\\soboav\\Desktop\\Projects\\С#\\Catalog\\Catalog.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\soboav\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
     "C:\\Users\\soboav\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
