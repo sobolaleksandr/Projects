@@ -11,10 +11,12 @@ namespace Ecommerce.Models
         public DateTime Created { get; set; }
         public int Id { get; set; }
         public int Number { get; set; }
+        [Required]
         [RegularExpression(@"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}",
         ErrorMessage = "Некорректный адрес")]
         public string CustomerEmail { get; set; }
         public Customer Customer { get; set; }
-        public List<LineBuffer> Items { get; set; }//Несколько позиций с продуктами
+        //Несколько позиций с продуктами
+        public ICollection<LineBuffer> Items { get; set; }
     }
 }

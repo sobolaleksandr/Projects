@@ -36,6 +36,11 @@ namespace Ecommerce.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetProduct(string id)
         {
+            if (id == default)
+            {
+                BadRequest();
+            }
+
             var product = await _context.Products.FindAsync(id);
 
             if (product == null)
@@ -47,12 +52,10 @@ namespace Ecommerce.Controllers
         }
 
         // PUT: api/Products/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProduct(string id, Product product)
         {
-            if (id != product.Name)
+            if (id != product.Name || id == default(string))
             {
                 return BadRequest();
             }
@@ -79,35 +82,44 @@ namespace Ecommerce.Controllers
         }
 
         // POST: api/Products
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
         public async Task<ActionResult<Product>> PostProduct(Product product)
         {
-            _context.Products.Add(product);
-            try
+            if (ModelState.IsValid)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (ProductExists(product.Name))
+                _context.Products.Add(product);
+
+                try
                 {
-                    return Conflict();
+                    await _context.SaveChangesAsync();
                 }
-                else
+                catch (DbUpdateException)
                 {
-                    throw;
+                    if (ProductExists(product.Name))
+                    {
+                        return Conflict();
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
+
+                return CreatedAtAction("GetProduct", new { id = product.Name }, product);
             }
 
-            return CreatedAtAction("GetProduct", new { id = product.Name }, product);
+            return BadRequest();
         }
 
         // DELETE: api/Products/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<Product>> DeleteProduct(string id)
         {
+            if (id == default(string))
+            {
+                return BadRequest();
+            }
+
             var product = await _context.Products.FindAsync(id);
             if (product == null)
             {

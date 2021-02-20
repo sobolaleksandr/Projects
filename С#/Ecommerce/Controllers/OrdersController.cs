@@ -27,21 +27,31 @@ namespace Ecommerce.Controllers
         //Список клиентов, заказавших товара на сумму, превышающую указанную
         public async Task<ActionResult<IEnumerable<string>>> GetCustomers(decimal sum)
         {
-            var customerOrder =
-                await _context.CustomerInvestments
-                .AsNoTracking()
-                .Where(p=>p.Sum > sum)
-                .Select(p => p.CustomerEmail)
-                .Distinct()
-                .ToListAsync();
+            if (sum > 0)
+            {
+                var customerOrder =
+                    await _context.CustomerInvestments
+                    .AsNoTracking()
+                    .Where(p => p.Sum > sum)
+                    .Select(p => p.CustomerEmail)
+                    .Distinct()
+                    .ToListAsync();
 
-            return customerOrder;
+                return customerOrder;
+            }
+
+            return BadRequest();
         }
 
         // GET: api/Orders/5
         [HttpGet("{id}")]
         public async Task<ActionResult<IEnumerable<CustomerOrder>>> GetCustomer(string id)
         {
+            if (id == default)
+            {
+                return BadRequest();
+            }
+
             var customerOrder = 
                 await _context.CustomerOrders
                 .AsNoTracking()
@@ -51,15 +61,13 @@ namespace Ecommerce.Controllers
             return customerOrder;
         }
 
-        // PUT: api/Orders/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        // PUT: api/Orders/5       
         [HttpPut("{id}")]
         public async Task<IActionResult> PutOrder(int id, Order order)
         {
             if (id != order.Id)
             {
-                return BadRequest();
+                return BadRequest("");
             }
 
             _context.Entry(order).State = EntityState.Modified;
@@ -83,65 +91,118 @@ namespace Ecommerce.Controllers
             return NoContent();
         }
 
-        // POST: api/Orders
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPost]
-        public async Task<ActionResult<Order>> Create(Order order)
+        public async Task<bool> IsValidOrder(Order order)
         {
-            Customer customer = order.Customer;
+            var _customer = await _context.Customers.FindAsync(order.Customer.Email);
 
-            CustomerOrder customerOrder = new CustomerOrder();
-            customerOrder.CustomerEmail = customer.Email;
-            customerOrder.OrderNumber = order.Number;
+            if (_customer != null)
+            {
+                order.Customer = null;
+            }
+
+            try
+            {
+                await _context.LineBuffers.AddRangeAsync(order.Items);
+                _context.LineBuffers.RemoveRange(order.Items);
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public async void UpdateProductList(LineBuffer item)
+        {
+            ProductList productList = await _context.ProductLists
+                            .Where(p => p.ProductName == item.ProductName)
+                            .FirstOrDefaultAsync();
+
+            if (productList == null)
+            {
+                productList = new ProductList
+                {
+                    ProductName = item.ProductName,
+                    Quantity = item.Quantity,
+                    Popularity = 1
+                };
+                await _context.ProductLists.AddAsync(productList);
+            }
+            else
+            {
+                productList.Quantity += item.Quantity;
+                productList.Popularity += 1;
+                _context.ProductLists.Update(productList);
+            }
+        }
+
+        public async Task<decimal> GetSum(LineBuffer item)
+        {
+            Product product = await _context.Products.FindAsync(item.ProductName);
+
+            if (product == null)
+            {
+                return default;
+            }
+
+            return product.Price * item.Quantity;
+        }
+
+        // POST: api/Orders       
+        [HttpPost]
+        public async Task<ActionResult<Order>> CreateOrder(Order order)
+        {
+            if (!await IsValidOrder(order))
+            {
+                return BadRequest();
+            }
+
+            CustomerOrder customerOrder = new CustomerOrder
+            {
+                CustomerEmail = order.CustomerEmail,
+                OrderNumber = order.Number
+            };
+
             decimal sum = 0;
 
             List<LineItem> lineItems = new List<LineItem>();
 
             foreach (LineBuffer item in order.Items)
             {
-                LineItem lineItem = 
-                    new LineItem { ProductName = item.ProductName, Quantity = item.Quantity};
-                lineItems.Add(lineItem);
+                UpdateProductList(item);
+                lineItems.Add(
+                new LineItem
+                {
+                    ProductName = item.ProductName,
+                    Quantity = item.Quantity
+                });
 
                 Product product = await _context.Products.FindAsync(item.ProductName);
                 if (product == null)
                 {
                     return NotFound();
-                }
-                ProductList productList = await _context.ProductLists
-                    .Where(p => p.ProductName == item.ProductName).FirstOrDefaultAsync();
+                }                
 
-                if (productList == null)
-                {
-                    productList = new ProductList
-                    {
-                        ProductName = product.Name,
-                        Quantity = item.Quantity,
-                        Popularity = 1
-                    };
-                    await _context.ProductLists.AddAsync(productList);
-                }
-                else
-                {
-                    productList.Quantity += item.Quantity;
-                    productList.Popularity += 1;
-                    _context.ProductLists.Update(productList);
-                }
+                sum += await GetSum(item);
+            }
 
-                sum += product.Price * item.Quantity;
+            if (sum == default)
+            {
+                return BadRequest();
             }
 
             order.Items = null;
             customerOrder.Sum = sum;
 
             var _customerInvestment = await _context.CustomerInvestments
-                .Where(p => p.CustomerEmail == customer.Email).FirstOrDefaultAsync();
+                .Where(p => p.CustomerEmail == order.CustomerEmail).FirstOrDefaultAsync();
 
             if (_customerInvestment == null)
             {
                 await _context.CustomerInvestments.AddAsync
-                    (new CustomerInvestment { Sum = sum, CustomerEmail = customer.Email});
+                    (new CustomerInvestment { Sum = sum, 
+                        CustomerEmail = order.CustomerEmail});
             }
             else
             {
@@ -149,12 +210,7 @@ namespace Ecommerce.Controllers
                 _context.CustomerInvestments.Update(_customerInvestment);
             }
 
-            var _customer = await _context.Customers.FindAsync(customer.Email);
 
-            if (_customer != null)
-            {
-                order.Customer = null;
-            }
 
             await _context.LineItems.AddRangeAsync(lineItems);
             await _context.Orders.AddAsync(order);
@@ -177,7 +233,7 @@ namespace Ecommerce.Controllers
             _context.Orders.Remove(order);
             await _context.SaveChangesAsync();
 
-            return order;
+            return NoContent();
         }
 
         private bool OrderExists(int id)
