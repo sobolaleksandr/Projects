@@ -9009,19 +9009,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\soboav\\.nuget\\packages\\": {}
+    "C:\\Users\\u3aya\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\soboav\\source\\repos\\Ecommerce\\Ecommerce.csproj",
+      "projectUniqueName": "C:\\Users\\u3aya\\OneDrive\\Desktop\\Projects\\С#\\Ecommerce\\Ecommerce.csproj",
       "projectName": "Ecommerce",
-      "projectPath": "C:\\Users\\soboav\\source\\repos\\Ecommerce\\Ecommerce.csproj",
-      "packagesPath": "C:\\Users\\soboav\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\soboav\\source\\repos\\Ecommerce\\obj\\",
+      "projectPath": "C:\\Users\\u3aya\\OneDrive\\Desktop\\Projects\\С#\\Ecommerce\\Ecommerce.csproj",
+      "packagesPath": "C:\\Users\\u3aya\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\u3aya\\OneDrive\\Desktop\\Projects\\С#\\Ecommerce\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\soboav\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\u3aya\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
