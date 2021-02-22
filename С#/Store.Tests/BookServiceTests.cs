@@ -1,4 +1,4 @@
-﻿using Moq;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,90 +8,40 @@ namespace Store.Tests
 {
     public class BookServiceTests
     {
-        //[Fact]
-        //public void GetAllByQuery_WithIsbn_CallsGetAllByIsbn()
-        //{
-        //    var bookRepositoryStub = new Mock<IBookRepository>();
-        //    bookRepositoryStub.Setup(x => x.GetAllByIsbn(It.IsAny<string>()))
-        //                      .Returns(new[] { new Book(1, "", "", "") });
-
-        //    bookRepositoryStub.Setup(x => x.GetAllByTitleOrAuthor(It.IsAny<string>()))
-        //                      .Returns(new[] { new Book(2, "", "", "") });
-
-        //    var bookService = new BookService(bookRepositoryStub.Object);
-        //    var validIsbn = "ISBN 12345-67890";
-
-        //    var actual = bookService.GetAllByQuery(validIsbn);
-
-        //    Assert.Collection(actual, book => Assert.Equal(1, book.Id));
-        //}
-
-        //[Fact]
-        //public void GetAllByQuery_WithIsbn_CallsGetAllByTitleOrAuthor()
-        //{
-        //    var bookRepositoryStub = new Mock<IBookRepository>();
-        //    bookRepositoryStub.Setup(x => x.GetAllByIsbn(It.IsAny<string>()))
-        //                      .Returns(new[] { new Book(1, "", "", "") });
-
-        //    bookRepositoryStub.Setup(x => x.GetAllByTitleOrAuthor(It.IsAny<string>()))
-        //                      .Returns(new[] { new Book(2, "", "", "") });
-
-        //    var bookService = new BookService(bookRepositoryStub.Object);
-        //    var invalidIsbn = "12345-67890";
-
-        //    var actual = bookService.GetAllByQuery(invalidIsbn);
-
-        //    Assert.Collection(actual, book => Assert.Equal(2, book.Id));
-        //}
-
         [Fact]
         public void GetAllByQuery_WithIsbn_CallsGetAllByIsbn()
         {
-            const int idOfIsbnSearch = 1;
-            const int idOfAuthorSearch = 2;
+            var bookRepositoryStub = new Mock<IBookRepository>();
+            bookRepositoryStub.Setup(x => x.GetAllByIsbn(It.IsAny<string>()))
+                              .Returns(new[] { new Book(1, "", "", "", "", 0m) });
 
-            var bookRepository = new StubBookRepository();
+            bookRepositoryStub.Setup(x => x.GetAllByTitleOrAuthor(It.IsAny<string>()))
+                              .Returns(new[] { new Book(2, "", "", "", "", 0m) });
 
-            bookRepository.ResultOfGetAllByIsbn = new[]
-            {
-                new Book(idOfIsbnSearch, "","","")
-            };
+            var bookService = new BookService(bookRepositoryStub.Object);
+            var validIsbn = "ISBN 12345-67890";
 
-            bookRepository.ResultOfGetAllByTitleOrAuthor = new[]
-            {
-                new Book(idOfAuthorSearch, "","","")
-            };
+            var actual = bookService.GetAllByQuery(validIsbn);
 
-            var bookService = new BookService(bookRepository);
-
-            var books = bookService.GetAllByQuery("ISBN 12345-67890");
-
-            Assert.Collection(books, book => Assert.Equal(idOfIsbnSearch, book.Id));
+            Assert.Collection(actual, book => Assert.Equal(1, book.Id));
         }
 
         [Fact]
         public void GetAllByQuery_WithIsbn_CallsGetAllByTitleOrAuthor()
         {
-            const int idOfIsbnSearch = 1;
-            const int idOfAuthorSearch = 2;
+            var bookRepositoryStub = new Mock<IBookRepository>();
+            bookRepositoryStub.Setup(x => x.GetAllByIsbn(It.IsAny<string>()))
+                              .Returns(new[] { new Book(1, "", "", "", "", 0m) });
 
-            var bookRepository = new StubBookRepository();
+            bookRepositoryStub.Setup(x => x.GetAllByTitleOrAuthor(It.IsAny<string>()))
+                              .Returns(new[] { new Book(2, "", "", "", "", 0m) });
 
-            bookRepository.ResultOfGetAllByIsbn = new[]
-            {
-                new Book(idOfIsbnSearch, "","","")
-            };
+            var bookService = new BookService(bookRepositoryStub.Object);
+            var invalidIsbn = "12345-67890";
 
-            bookRepository.ResultOfGetAllByTitleOrAuthor = new[]
-            {
-                new Book(idOfAuthorSearch, "","","")
-            };
+            var actual = bookService.GetAllByQuery(invalidIsbn);
 
-            var bookService = new BookService(bookRepository);
-
-            var books = bookService.GetAllByQuery("Programming");
-
-            Assert.Collection(books, book => Assert.Equal(idOfAuthorSearch, book.Id));
+            Assert.Collection(actual, book => Assert.Equal(2, book.Id));
         }
     }
 }
