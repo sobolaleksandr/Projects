@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Store
+namespace Store.Memory
 {
-
     public class BookRepository : IBookRepository
     {
         private readonly Book[] books = new[]
