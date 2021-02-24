@@ -3,23 +3,47 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Ecommerce.Models;
-
+using Ecommerce.Domain;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ecommerce.ViewModels;
 
-namespace Ecommerce
+
+namespace Ecommerce.Infrostructure
 {
-    public class EcommerceRepository:IRepository
+    public class OrderRepository:IOrderRepository
     {
-        private async Task<bool> IsValidOrder(Order order)
+        private EcommerceContext _context;
+
+        public async Task<decimal> GetSum(LineBuffer item)
+        {
+            Product product = await _context.Products.FindAsync(item.ProductName);
+
+            if (product == null)
+            {
+                return default;
+            }
+
+            return product.Price * item.Quantity;
+        }
+
+        public async Task<bool> IsValidOrder(Order order)
         {
             Customer _customer = await _context.Customers.FindAsync(order.Customer.Email);
 
             if (_customer != null)
             {
                 order.Customer = null;
+            }
+
+            if (order.Items == null)
+            {
+                return false;
+            }
+            if (order.Items.Count == 0)
+            {
+                return false;
             }
 
             try
@@ -31,26 +55,35 @@ namespace Ecommerce
             {
                 return false;
             }
+            
+            foreach(var item in order.Items)
+            {
+                Product product = await _context.Products.FindAsync(item.ProductName);
+                if (product == null)
+                {
+                    return false;
+                }
+            }
 
             return true;
         }
-        private EcommerceContext _context;
-        public EcommerceRepository(EcommerceContext context)
+        public OrderRepository(EcommerceContext context)
         {
             _context = context;
         }
-        public async Task<IActionResult> Create(Order order)
+        public async Task Create(Order order)
         {
-            return null;
+            await _context.Orders.AddAsync(order);
+            await _context.SaveChangesAsync();
         }
-        public async Task<IEnumerable<CustomerOrder>> Get(string id)
+        public async Task<ActionResult<IEnumerable<CustomerOrder>>> Get(string id)
         {
             return await _context.CustomerOrders
                 .AsNoTracking()
                 .Where(m => m.CustomerEmail == id)
                 .ToListAsync();
         }
-        public async Task<IEnumerable<string>> GetAll(decimal sum)
+        public async Task<ActionResult<IEnumerable<string>>> GetAll(decimal sum)
         {
                 return await _context.CustomerInvestments
                     .AsNoTracking()
@@ -74,11 +107,6 @@ namespace Ecommerce
         }
         public async Task<bool> Put(int id, Order order)
         {
-            if (id != order.Id)
-            {
-                return false;
-            }
-
             _context.Entry(order).State = EntityState.Modified;
 
             try

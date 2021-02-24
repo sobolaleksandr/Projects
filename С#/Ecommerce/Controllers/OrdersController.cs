@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ecommerce.Models;
 using Ecommerce.ViewModels;
+using Ecommerce.Domain;
 
 namespace Ecommerce.Controllers
 {
@@ -15,11 +16,24 @@ namespace Ecommerce.Controllers
     [ApiController]
     public class OrdersController : ControllerBase
     {
-        private readonly EcommerceContext _context;
+        private readonly IOrderRepository orderRepository;
+        private readonly ICustomerInvestmentRepository customerInvestmentRepository;
+        private readonly ILineItemsRepository lineItemsRepository;
+        private readonly IProductListRepository productListRepository;
+        private readonly ICustomerOrderRepository customerOrderRepository;
 
-        public OrdersController(EcommerceContext context)
+        public OrdersController(
+        IOrderRepository orderRepository,
+        ICustomerInvestmentRepository customerInvestmentRepository,
+        ILineItemsRepository lineItemsRepository,
+        IProductListRepository productListRepository,
+        ICustomerOrderRepository customerOrderRepository)
         {
-            _context = context;
+             this.orderRepository = orderRepository;
+             this.customerInvestmentRepository = customerInvestmentRepository;
+             this.lineItemsRepository = lineItemsRepository;
+             this.productListRepository = productListRepository;
+             this.customerOrderRepository = customerOrderRepository;
         }
 
         // GET: api/Orders
@@ -29,15 +43,7 @@ namespace Ecommerce.Controllers
         {
             if (sum > 0)
             {
-                var customerOrder =
-                    await _context.CustomerInvestments
-                    .AsNoTracking()
-                    .Where(p => p.Sum > sum)
-                    .Select(p => p.CustomerEmail)
-                    .Distinct()
-                    .ToListAsync();
-
-                return customerOrder;
+                return await orderRepository.GetAll(sum);
             }
 
             return BadRequest();
@@ -52,13 +58,7 @@ namespace Ecommerce.Controllers
                 return BadRequest();
             }
 
-            var customerOrder = 
-                await _context.CustomerOrders
-                .AsNoTracking()
-                .Where(m => m.CustomerEmail == id)
-                .ToListAsync();
-
-            return customerOrder;
+            return await orderRepository.Get(id);
         }
 
         // PUT: api/Orders/5       
@@ -69,122 +69,31 @@ namespace Ecommerce.Controllers
             {
                 return BadRequest("");
             }
-
-            _context.Entry(order).State = EntityState.Modified;
-
-            try
+            if (await orderRepository.Put(id, order))
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!OrderExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return NoContent();
             }
 
-            return NoContent();
+            return NotFound();
         }
 
-        public async Task<bool> IsValidOrder(Order order)
-        {
-            var _customer = await _context.Customers.FindAsync(order.Customer.Email);
-
-            if (_customer != null)
-            {
-                order.Customer = null;
-            }
-
-            try
-            {
-                await _context.LineBuffers.AddRangeAsync(order.Items);
-                _context.LineBuffers.RemoveRange(order.Items);
-            }
-            catch
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        public async void UpdateProductList(LineBuffer item)
-        {
-            ProductList productList = await _context.ProductLists
-                            .Where(p => p.ProductName == item.ProductName)
-                            .FirstOrDefaultAsync();
-
-            if (productList == null)
-            {
-                productList = new ProductList
-                {
-                    ProductName = item.ProductName,
-                    Quantity = item.Quantity,
-                    Popularity = 1
-                };
-                await _context.ProductLists.AddAsync(productList);
-            }
-            else
-            {
-                productList.Quantity += item.Quantity;
-                productList.Popularity += 1;
-                _context.ProductLists.Update(productList);
-            }
-        }
-
-        public async Task<decimal> GetSum(LineBuffer item)
-        {
-            Product product = await _context.Products.FindAsync(item.ProductName);
-
-            if (product == null)
-            {
-                return default;
-            }
-
-            return product.Price * item.Quantity;
-        }
-
+        
         // POST: api/Orders       
         [HttpPost]
         public async Task<ActionResult<Order>> CreateOrder(Order order)
         {
-            if (!await IsValidOrder(order))
+            if (!await orderRepository.IsValidOrder(order))
             {
                 return BadRequest();
             }
 
-            CustomerOrder customerOrder = new CustomerOrder
-            {
-                CustomerEmail = order.CustomerEmail,
-                OrderNumber = order.Number
-            };
-
             decimal sum = 0;
-
-            List<LineItem> lineItems = new List<LineItem>();
 
             foreach (LineBuffer item in order.Items)
             {
-                UpdateProductList(item);
-                lineItems.Add(
-                new LineItem
-                {
-                    ProductName = item.ProductName,
-                    Quantity = item.Quantity
-                });
-
-                Product product = await _context.Products.FindAsync(item.ProductName);
-                if (product == null)
-                {
-                    return NotFound();
-                }                
-
-                sum += await GetSum(item);
+                await productListRepository.Create(item);
+                await lineItemsRepository.Create(item);
+                sum += await orderRepository.GetSum(item);
             }
 
             if (sum == default)
@@ -193,29 +102,10 @@ namespace Ecommerce.Controllers
             }
 
             order.Items = null;
-            customerOrder.Sum = sum;
 
-            var _customerInvestment = await _context.CustomerInvestments
-                .Where(p => p.CustomerEmail == order.CustomerEmail).FirstOrDefaultAsync();
-
-            if (_customerInvestment == null)
-            {
-                await _context.CustomerInvestments.AddAsync
-                    (new CustomerInvestment { Sum = sum, 
-                        CustomerEmail = order.CustomerEmail});
-            }
-            else
-            {
-                _customerInvestment.Sum += sum;
-                _context.CustomerInvestments.Update(_customerInvestment);
-            }
-
-
-
-            await _context.LineItems.AddRangeAsync(lineItems);
-            await _context.Orders.AddAsync(order);
-            await _context.CustomerOrders.AddAsync(customerOrder);
-            await _context.SaveChangesAsync();
+            await customerOrderRepository.Create(order, sum);
+            await customerInvestmentRepository.Create(order, sum);
+            await orderRepository.Create(order);
 
             return Ok();
         }
@@ -224,21 +114,13 @@ namespace Ecommerce.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<Order>> DeleteOrder(int id)
         {
-            var order = await _context.Orders.FindAsync(id);
-            if (order == null)
+            if (await orderRepository.Delete(id))
             {
-                return NotFound();
+                return NoContent();
             }
 
-            _context.Orders.Remove(order);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return NotFound();
         }
 
-        private bool OrderExists(int id)
-        {
-            return _context.Orders.Any(e => e.Id == id);
-        }
     }
 }

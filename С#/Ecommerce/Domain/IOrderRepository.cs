@@ -8,14 +8,16 @@ using Microsoft.EntityFrameworkCore;
 using Ecommerce.Models;
 using Ecommerce.ViewModels;
 
-namespace Ecommerce
+namespace Ecommerce.Domain
 {
-    interface IRepository
+    public interface IOrderRepository
     {
-        Task<IEnumerable<string>> GetAll(decimal sum);
-        Task<IEnumerable<CustomerOrder>> Get(string id);
+        Task<ActionResult<IEnumerable<string>>> GetAll(decimal sum);
+        Task<ActionResult<IEnumerable<CustomerOrder>>> Get(string id);
         Task<bool> Put(int id, Order order);
-        Task<IActionResult> Create(Order order);
+        Task Create(Order order);
         Task<bool> Delete(int id);
+        Task<bool> IsValidOrder(Order order);
+        Task<decimal> GetSum(LineBuffer item);
     }
 }

@@ -9,6 +9,8 @@ using System;
 using System.Reflection;
 using System.IO;
 using Microsoft.OpenApi.Models;
+using Ecommerce.Domain;
+using Ecommerce.Infrostructure;
 
 namespace Ecommerce
 {
@@ -54,6 +56,13 @@ namespace Ecommerce
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
+
+            services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<ICustomerOrderRepository, CustomerOrderRepository>();
+            services.AddScoped<ICustomerInvestmentRepository, CustomerInvestmentRepository>();
+            services.AddScoped<ILineItemsRepository, LineItemsRepository>();
+            services.AddScoped<IProductListRepository, ProductListRepository>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
