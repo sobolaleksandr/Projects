@@ -20,7 +20,8 @@ namespace Store.Web.Controllers
             _context = context;
         }
 
-        // GET: api/Products
+        //Возращаем список продуктов, отсортированных по популярности
+        //для кажого продукта указываем общее количество проданных единиц
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductList>>> GetProducts()
         {
@@ -30,7 +31,7 @@ namespace Store.Web.Controllers
                 .ToListAsync();
         }
 
-        // GET: api/Products/5
+        //Оставил реализацию по-умолчанию
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetProduct(string id)
         {
@@ -49,7 +50,7 @@ namespace Store.Web.Controllers
             return product;
         }
 
-        // PUT: api/Products/5
+        //Оставил реализацию по-умолчанию
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProduct(string id, Product product)
         {
@@ -79,7 +80,7 @@ namespace Store.Web.Controllers
             return NoContent();
         }
 
-        // POST: api/Products
+        //Оставил реализацию по-умолчанию
         [HttpPost]
         public async Task<ActionResult<Product>> PostProduct(Product product)
         {
@@ -109,7 +110,7 @@ namespace Store.Web.Controllers
             return BadRequest();
         }
 
-        // DELETE: api/Products/5
+        //Оставил реализацию по-умолчанию
         [HttpDelete("{id}")]
         public async Task<ActionResult<Product>> DeleteProduct(string id)
         {
@@ -130,6 +131,7 @@ namespace Store.Web.Controllers
             return product;
         }
 
+        //Оставил реализацию по-умолчанию
         private bool ProductExists(string id)
         {
             return _context.Products.Any(e => e.Name == id);

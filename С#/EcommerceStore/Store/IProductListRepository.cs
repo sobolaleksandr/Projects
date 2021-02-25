@@ -4,6 +4,6 @@ namespace Store
 {
     public interface IProductListRepository
     {
-        Task Create(LineBuffer item);
+        Task CreateOrUpdate(LineBuffer item);
     }
 }

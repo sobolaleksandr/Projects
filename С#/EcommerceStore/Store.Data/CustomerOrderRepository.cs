@@ -7,6 +7,7 @@ namespace Store.Data
     public class CustomerOrderRepository : ICustomerOrderRepository
     {
         private EcommerceContext _context;
+
         public CustomerOrderRepository(EcommerceContext context)
         {
             _context = context;

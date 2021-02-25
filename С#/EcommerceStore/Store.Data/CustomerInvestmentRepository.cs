@@ -14,28 +14,42 @@ namespace Store.Data
         {
             _context = context;
         }
-        public async Task Create(Order order, decimal sum)
-        {
-            var _customerInvestment = await _context.CustomerInvestments
-                .Where(p => p.CustomerEmail == order.CustomerEmail).FirstOrDefaultAsync();
 
-            if (_customerInvestment == null)
-            {
-                await _context.CustomerInvestments.AddAsync(
-                    new CustomerInvestment
-                    {
-                        Sum = sum,
-                        CustomerEmail = order.CustomerEmail
-                    });
-            }
+        public async Task CreateOrUpdate(Order order, decimal sum)
+        {
+            CustomerInvestment customerInvestment = await GetByEmail(order.CustomerEmail);
+
+            if (customerInvestment == null)
+                await Add(order.CustomerEmail, sum);
             else
-            {
-                _customerInvestment.Sum += sum;
-                _context.CustomerInvestments.Update(_customerInvestment);
-            }
+                Update(customerInvestment, sum);
 
             await _context.SaveChangesAsync();
         }
+
+        private async Task<CustomerInvestment> GetByEmail(string Email)
+        {
+            return await _context.CustomerInvestments
+                            .Where(p => p.CustomerEmail == Email)
+                            .FirstOrDefaultAsync();
+        }
+
+        private async Task Add(string Email, decimal sum)
+        {
+            await _context.CustomerInvestments.AddAsync(
+                   new CustomerInvestment
+                   {
+                       Sum = sum,
+                       CustomerEmail = Email
+                   });
+        }
+
+        private void Update(CustomerInvestment customerInvestment, decimal sum)
+        {
+            customerInvestment.Sum += sum;
+            _context.CustomerInvestments.Update(customerInvestment);
+        }
+
     }
 
 }

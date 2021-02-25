@@ -9,8 +9,8 @@ namespace Store
 {
     public interface IOrderRepository
     {
-        Task<ActionResult<IEnumerable<string>>> GetAll(decimal sum);
-        Task<ActionResult<IEnumerable<CustomerOrder>>> Get(string id);
+        Task<IEnumerable<string>> GetAll(decimal sum);
+        Task<IEnumerable<CustomerOrder>> Get(string id);
         Task<bool> Put(int id, Order order);
         Task Create(Order order);
         Task<bool> Delete(int id);

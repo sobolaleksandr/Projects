@@ -26,7 +26,7 @@ namespace Store
             Description = description;
             Price = price;
         }
-        internal static bool IsIsbn(string s)
+        public static bool IsIsbn(string s)
         {
             if (s == null)
                 return false;

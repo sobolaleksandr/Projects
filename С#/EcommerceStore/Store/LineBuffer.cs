@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Store
 {
+    //Временный буфер для хранения "оригинальных" товаров
     public class LineBuffer
     {
         public int Id { get; set; }

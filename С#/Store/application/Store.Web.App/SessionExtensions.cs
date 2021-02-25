@@ -1,13 +1,17 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Store.Web.Models;
 using System.IO;
 using System.Text;
 
-namespace Store.Web
+namespace Store.Web.App
 {
-    public static class SessionsExtensions
+    public static class SessionExtensions
     {
         private const string key = "Cart";
+
+        public static void RemoveCart(this ISession session)
+        {
+            session.Remove(key);
+        }
 
         public static void Set(this ISession session, Cart value)
         {
@@ -30,26 +34,19 @@ namespace Store.Web
             if (session.TryGetValue(key, out byte[] buffer))
             {
                 using (var stream = new MemoryStream(buffer))
-                using (var reader = new BinaryReader(stream,Encoding.UTF8,true))
+                using (var reader = new BinaryReader(stream, Encoding.UTF8, true))
                 {
                     var orderId = reader.ReadInt32();
                     var totalCount = reader.ReadInt32();
                     var totalPrice = reader.ReadDecimal();
 
-                    value = new Cart(orderId)
-                    {
-                        TotalCount = totalCount,
-                        TotalPrice = totalPrice
-                    };
-
+                    value = new Cart(orderId, totalCount, totalPrice);
                     return true;
-                }    
+                }
             }
 
             value = null;
             return false;
         }
-
-
     }
 }

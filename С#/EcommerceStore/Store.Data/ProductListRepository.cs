@@ -15,30 +15,40 @@ namespace Store.Data
             _context = context;
         }
 
-        public async Task Create(LineBuffer item)
+        public async Task CreateOrUpdate(LineBuffer item)
         {
-            ProductList productList = await _context.ProductLists
-                            .Where(p => p.ProductName == item.ProductName)
-                            .FirstOrDefaultAsync();
+            ProductList productList = await GetByProductName(item.ProductName);
 
             if (productList == null)
-            {
-                productList = new ProductList
-                {
-                    ProductName = item.ProductName,
-                    Quantity = item.Quantity,
-                    Popularity = 1
-                };
-                await _context.ProductLists.AddAsync(productList);
-            }
+                await Add(item.ProductName, item.Quantity);
             else
-            {
-                productList.Quantity += item.Quantity;
-                productList.Popularity += 1;
-                _context.ProductLists.Update(productList);
-            }
+                Update(productList, item.Quantity);
 
             await _context.SaveChangesAsync();
+        }
+
+        private async Task<ProductList> GetByProductName(string ProductName)
+        {
+            return await _context.ProductLists
+                            .Where(p => p.ProductName == ProductName)
+                            .FirstOrDefaultAsync();
+        }
+
+        private async Task Add(string ProductName, int Quantity)
+        {
+            await _context.ProductLists.AddAsync(new ProductList
+            {
+                ProductName = ProductName,
+                Quantity = Quantity,
+                Popularity = 1
+            });
+        }
+
+        private void Update(ProductList productList, int Quantity)
+        {
+            productList.Quantity += Quantity;
+            productList.Popularity += 1;
+            _context.ProductLists.Update(productList);
         }
     }
 }

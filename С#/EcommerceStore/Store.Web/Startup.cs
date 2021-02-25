@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore; // пространство имен EntityFramework
+using Microsoft.EntityFrameworkCore; 
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Reflection;
@@ -28,6 +28,8 @@ namespace Store.Web
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<EcommerceContext>(options => options.UseSqlServer(connection));
             services.AddControllers();
+            //¬з€л инициализацию из примера
+
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
             {

@@ -17,7 +17,7 @@ namespace Store.Memory
         public EcommerceContext(DbContextOptions<EcommerceContext> options)
             : base(options)
         {
-            Database.EnsureCreated();
+            //Database.EnsureCreated();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

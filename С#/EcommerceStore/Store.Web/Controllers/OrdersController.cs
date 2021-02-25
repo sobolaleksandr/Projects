@@ -22,11 +22,11 @@ namespace Store.Web.Controllers
         private readonly ICustomerOrderRepository customerOrderRepository;
 
         public OrdersController(
-        IOrderRepository orderRepository,
-        ICustomerInvestmentRepository customerInvestmentRepository,
-        ILineItemsRepository lineItemsRepository,
-        IProductListRepository productListRepository,
-        ICustomerOrderRepository customerOrderRepository)
+            IOrderRepository orderRepository,
+            ICustomerInvestmentRepository customerInvestmentRepository,
+            ILineItemsRepository lineItemsRepository,
+            IProductListRepository productListRepository,
+            ICustomerOrderRepository customerOrderRepository)
         {
             this.orderRepository = orderRepository;
             this.customerInvestmentRepository = customerInvestmentRepository;
@@ -35,20 +35,19 @@ namespace Store.Web.Controllers
             this.customerOrderRepository = customerOrderRepository;
         }
 
-        // GET: api/Orders
-        [HttpGet]
         //Список клиентов, заказавших товара на сумму, превышающую указанную
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<string>>> GetCustomers(decimal sum)
         {
             if (sum > 0)
             {
-                return await orderRepository.GetAll(sum);
+                return new ObjectResult(await orderRepository.GetAll(sum));
             }
 
             return BadRequest();
         }
 
-        // GET: api/Orders/5
+        //Список заказов для указанного клиента, с указанием общей стоимости каждого
         [HttpGet("{id}")]
         public async Task<ActionResult<IEnumerable<CustomerOrder>>> GetCustomer(string id)
         {
@@ -57,10 +56,10 @@ namespace Store.Web.Controllers
                 return BadRequest();
             }
 
-            return await orderRepository.Get(id);
+            return new ObjectResult(await orderRepository.Get(id));
         }
 
-        // PUT: api/Orders/5       
+        //Оставил реализацию по-умолчанию
         [HttpPut("{id}")]
         public async Task<IActionResult> PutOrder(int id, Order order)
         {
@@ -76,8 +75,8 @@ namespace Store.Web.Controllers
             return NotFound();
         }
 
-
-        // POST: api/Orders       
+        //Создаем заказ, вместе с ним создаем клиента.
+        //Если клиента существует, создаем для него заказ
         [HttpPost]
         public async Task<ActionResult<Order>> CreateOrder(Order order)
         {
@@ -90,7 +89,7 @@ namespace Store.Web.Controllers
 
             foreach (LineBuffer item in order.Items)
             {
-                await productListRepository.Create(item);
+                await productListRepository.CreateOrUpdate(item);
                 await lineItemsRepository.Create(item);
                 sum += await orderRepository.GetSum(item);
             }
@@ -103,13 +102,13 @@ namespace Store.Web.Controllers
             order.Items = null;
 
             await customerOrderRepository.Create(order, sum);
-            await customerInvestmentRepository.Create(order, sum);
+            await customerInvestmentRepository.CreateOrUpdate(order, sum);
             await orderRepository.Create(order);
 
             return Ok();
         }
 
-        // DELETE: api/Orders/5
+        //Оставил реализацию по-умолчанию
         [HttpDelete("{id}")]
         public async Task<ActionResult<Order>> DeleteOrder(int id)
         {

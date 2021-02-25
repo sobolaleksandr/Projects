@@ -4,6 +4,6 @@ namespace Store
 {
     public interface ICustomerInvestmentRepository
     {
-        Task Create(Order order, decimal sum);
+        Task CreateOrUpdate(Order order, decimal sum);
     }
 }
