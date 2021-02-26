@@ -25,11 +25,8 @@ namespace Store.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //string connection = Configuration.GetConnectionString("DefaultConnection");
-            //services.AddDbContext<EcommerceContext>(options => options.UseSqlServer(connection));
             services.AddControllers();
             //Взял инициализацию из примера
-
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
             {
@@ -38,17 +35,11 @@ namespace Store.Web
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
+
             services.AddHttpContextAccessor();
             services.AddEfRepositories(Configuration.GetConnectionString("DefaultConnection"));
             services.AddSingleton<ProductService>();
             services.AddSingleton<OrderService>();
-
-            //services.AddScoped<IOrderRepository, OrderRepository>();
-            //services.AddScoped<ICustomerOrderRepository, CustomerOrderRepository>();
-            //services.AddScoped<ICustomerInvestmentRepository, CustomerInvestmentRepository>();
-            //services.AddScoped<ILineItemsRepository, LineItemsRepository>();
-            //services.AddScoped<IProductListRepository, ProductListRepository>();
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
