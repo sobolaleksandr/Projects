@@ -22,26 +22,50 @@ namespace Store.Memory
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<LineBuffer>()
-                .HasAlternateKey(u => new { u.ProductName });//В одном заказе уникальные продукты
-            modelBuilder.Entity<Order>()
-                .HasAlternateKey(u => new { u.Number });//номер заказа уникален
+            BuildProducts(modelBuilder);
+            BuildCustomers(modelBuilder);
+            BuildOrders(modelBuilder);
+            BuildLineBuffers(modelBuilder);
+        }
 
-            Product[] fruits = new Product[]
+        private static void BuildProducts(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Product>(action =>
             {
-                new Product { Name="mango", Price=230},
-                new Product { Name="banana", Price=206},
-                new Product { Name="apple", Price=100}
-            };
-            Customer[] employers = new Customer[]
-            {
-                new Customer { Name="Alex", Email = "alex99@gmail.com"},
-                new Customer { Name="Bob", Email = "bob_bob@yandex.com"},
-                new Customer { Name="Tom", Email = "TomT@yahoo.com"}
-            };
+                action.HasData(
+                new Product { Name = "mango", Price = 230 },
+                new Product { Name = "banana", Price = 206 },
+                new Product { Name = "apple", Price = 100 }
+                );
+            });
+        }
 
-            modelBuilder.Entity<Product>().HasData(fruits);
-            modelBuilder.Entity<Customer>().HasData(employers);
+        private static void BuildCustomers(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Customer>(action =>
+            {
+                action.HasData(
+                new Customer { Name = "Alex", Email = "alex99@gmail.com" },
+                new Customer { Name = "Bob", Email = "bob_bob@yandex.com" },
+                new Customer { Name = "Tom", Email = "TomT@yahoo.com" }
+                );
+            });
+        }
+
+        private static void BuildLineBuffers(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<LineBuffer>(action =>
+            {
+                action.HasAlternateKey(u => new { u.ProductName });//В одном заказе уникальные продукты
+            });
+        }
+
+        private static void BuildOrders(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Order>(action =>
+            {
+                action.HasAlternateKey(u => new { u.Number });//номер заказа уникален
+            });
         }
     }
 

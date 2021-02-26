@@ -56,7 +56,14 @@ namespace Store.Web.Controllers
                 return BadRequest();
             }
 
-            return new ObjectResult(await orderRepository.Get(id));
+            var customerOrder = await orderRepository.Get(id);
+
+            if (customerOrder == null)
+            {
+                return NotFound();
+            }
+
+            return new ObjectResult(customerOrder);
         }
 
         //Оставил реализацию по-умолчанию
@@ -67,6 +74,7 @@ namespace Store.Web.Controllers
             {
                 return BadRequest("");
             }
+
             if (await orderRepository.Put(id, order))
             {
                 return NoContent();

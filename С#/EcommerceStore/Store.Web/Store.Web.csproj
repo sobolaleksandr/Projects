@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Store.Data\Store.Data.csproj" />
     <ProjectReference Include="..\Store.Memory\Store.Memory.csproj" />
+    <ProjectReference Include="..\Store.Web.App\Store.Web.App.csproj" />
     <ProjectReference Include="..\Store\Store.csproj" />
   </ItemGroup>
 

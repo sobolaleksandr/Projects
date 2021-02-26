@@ -9,7 +9,7 @@ using System.Reflection;
 using System.IO;
 using Store.Memory;
 using Microsoft.OpenApi.Models;
-using Store.Data;
+using Store.Web.App;
 
 namespace Store.Web
 {
@@ -25,8 +25,8 @@ namespace Store.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            string connection = Configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<EcommerceContext>(options => options.UseSqlServer(connection));
+            //string connection = Configuration.GetConnectionString("DefaultConnection");
+            //services.AddDbContext<EcommerceContext>(options => options.UseSqlServer(connection));
             services.AddControllers();
             //Взял инициализацию из примера
 
@@ -57,12 +57,15 @@ namespace Store.Web
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
+            services.AddHttpContextAccessor();
+            services.AddEfRepositories(Configuration.GetConnectionString("DefaultConnection"));
+            services.AddSingleton<ProductService>();
 
-            services.AddScoped<IOrderRepository, OrderRepository>();
-            services.AddScoped<ICustomerOrderRepository, CustomerOrderRepository>();
-            services.AddScoped<ICustomerInvestmentRepository, CustomerInvestmentRepository>();
-            services.AddScoped<ILineItemsRepository, LineItemsRepository>();
-            services.AddScoped<IProductListRepository, ProductListRepository>();
+            //services.AddScoped<IOrderRepository, OrderRepository>();
+            //services.AddScoped<ICustomerOrderRepository, CustomerOrderRepository>();
+            //services.AddScoped<ICustomerInvestmentRepository, CustomerInvestmentRepository>();
+            //services.AddScoped<ILineItemsRepository, LineItemsRepository>();
+            //services.AddScoped<IProductListRepository, ProductListRepository>();
 
         }
 

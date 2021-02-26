@@ -7,17 +7,20 @@ using System.Threading.Tasks;
 
 namespace Store.Memory
 {
-    public class OrderRepository : IOrderRepository
+    class OrderRepository : IOrderRepository
     {
-        private EcommerceContext _context;
 
-        public OrderRepository(EcommerceContext context)
+        private readonly DbContextFactory dbContextFactory;
+
+        public OrderRepository(DbContextFactory dbContextFactory)
         {
-            _context = context;
+            this.dbContextFactory = dbContextFactory;
         }
 
         public async Task<decimal> GetSum(LineBuffer item)
         {
+            var _context = dbContextFactory.Create(typeof(OrderRepository));
+
             Product product = await _context.Products.FindAsync(item.ProductName);
 
             return product.Price * item.Quantity;
@@ -25,12 +28,20 @@ namespace Store.Memory
 
         public async Task<bool> IsValidOrder(Order order)
         {
+            var _context = dbContextFactory.Create(typeof(OrderRepository));
+
             Customer customer = await _context.Customers.FindAsync(order.Customer.Email);
 
             //проверяем существует ли клиент
             if (customer != null)
             {
                 order.Customer = null;
+            }
+
+            //сверяем id клиента с его id в заказе
+            if (order.Customer.Email != order.CustomerEmail)
+            {
+                return false;
             }
 
             //проверяем пустой ли список
@@ -71,12 +82,16 @@ namespace Store.Memory
 
         public async Task Create(Order order)
         {
+            var _context = dbContextFactory.Create(typeof(OrderRepository));
+
             await _context.Orders.AddAsync(order);
             await _context.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<CustomerOrder>> Get(string id)
         {
+            var _context = dbContextFactory.Create(typeof(OrderRepository));
+
             return await _context.CustomerOrders
                 .AsNoTracking()
                 .Where(m => m.CustomerEmail == id)
@@ -85,6 +100,8 @@ namespace Store.Memory
 
         public async Task<IEnumerable<string>> GetAll(decimal sum)
         {
+            var _context = dbContextFactory.Create(typeof(OrderRepository));
+
             return await _context.CustomerInvestments
                 .AsNoTracking()
                 .Where(p => p.Sum > sum)
@@ -95,6 +112,8 @@ namespace Store.Memory
 
         public async Task<bool> Delete(int id)
         {
+            var _context = dbContextFactory.Create(typeof(OrderRepository));
+
             var order = await _context.Orders.FindAsync(id);
             if (order == null)
             {
@@ -109,6 +128,8 @@ namespace Store.Memory
 
         public async Task<bool> Put(int id, Order order)
         {
+            var _context = dbContextFactory.Create(typeof(OrderRepository));
+
             _context.Entry(order).State = EntityState.Modified;
 
             try
@@ -131,6 +152,8 @@ namespace Store.Memory
         }
         private bool Exists(int id)
         {
+            var _context = dbContextFactory.Create(typeof(OrderRepository));
+
             return _context.Orders.Any(e => e.Id == id);
         }
     }
