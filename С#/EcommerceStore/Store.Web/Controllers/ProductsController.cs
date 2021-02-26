@@ -50,7 +50,7 @@ namespace Store.Web.Controllers
 
         //Оставил реализацию по-умолчанию
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProduct(string id, Product product)
+        public async Task<IActionResult> UpdateProduct(string id, Product product)
         {
             if (id != product.Name || id == default(string))
             {

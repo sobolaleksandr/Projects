@@ -1,5 +1,7 @@
-﻿using Store.Memory;
+﻿using Microsoft.EntityFrameworkCore;
 using Store.Views;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Store.Memory
@@ -13,6 +15,15 @@ namespace Store.Memory
             this.dbContextFactory = dbContextFactory;
         }
 
+        public async Task<IEnumerable<CustomerOrder>> GetById(string id)
+        {
+            var _context = dbContextFactory.Create(typeof(CustomerOrderRepository));
+
+            return await _context.CustomerOrders
+                .AsNoTracking()
+                .Where(m => m.CustomerEmail == id)
+                .ToListAsync();
+        }
 
         public async Task Create(Order order, decimal sum)
         {

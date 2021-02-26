@@ -33,7 +33,7 @@ namespace Store.Memory
             ProductList productList = await GetByProductName(item.ProductName);
 
             if (productList == null)
-                await Add(item.ProductName, item.Quantity);
+                await Create(item.ProductName, item.Quantity);
             else
                 Update(productList, item.Quantity);
 
@@ -49,7 +49,7 @@ namespace Store.Memory
                             .FirstOrDefaultAsync();
         }
 
-        private async Task Add(string ProductName, int Quantity)
+        private async Task Create(string ProductName, int Quantity)
         {
             var _context = dbContextFactory.Create(typeof(ProductListRepository));
 

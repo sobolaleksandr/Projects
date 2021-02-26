@@ -4,9 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Store;
 using Store.Views;
+using Store.Web.App;
 
 namespace Store.Web.Controllers
 {
@@ -15,33 +14,20 @@ namespace Store.Web.Controllers
     [ApiController]
     public class OrdersController : ControllerBase
     {
-        private readonly IOrderRepository orderRepository;
-        private readonly ICustomerInvestmentRepository customerInvestmentRepository;
-        private readonly ILineItemsRepository lineItemsRepository;
-        private readonly IProductListRepository productListRepository;
-        private readonly ICustomerOrderRepository customerOrderRepository;
+        private readonly OrderService orderService;
 
-        public OrdersController(
-            IOrderRepository orderRepository,
-            ICustomerInvestmentRepository customerInvestmentRepository,
-            ILineItemsRepository lineItemsRepository,
-            IProductListRepository productListRepository,
-            ICustomerOrderRepository customerOrderRepository)
+        public OrdersController(OrderService orderService)
         {
-            this.orderRepository = orderRepository;
-            this.customerInvestmentRepository = customerInvestmentRepository;
-            this.lineItemsRepository = lineItemsRepository;
-            this.productListRepository = productListRepository;
-            this.customerOrderRepository = customerOrderRepository;
+            this.orderService = orderService;
         }
 
         //Список клиентов, заказавших товара на сумму, превышающую указанную
         [HttpGet]
         public async Task<ActionResult<IEnumerable<string>>> GetCustomers(decimal sum)
         {
-            if (sum > 0)
+            if (sum >= 0)
             {
-                return new ObjectResult(await orderRepository.GetAll(sum));
+                return new ObjectResult(await orderService.GetAllBySum(sum));
             }
 
             return BadRequest();
@@ -56,9 +42,9 @@ namespace Store.Web.Controllers
                 return BadRequest();
             }
 
-            var customerOrder = await orderRepository.Get(id);
+            var customerOrder = await orderService.GetById(id);
 
-            if (customerOrder == null)
+            if (customerOrder.Count() == 0)
             {
                 return NotFound();
             }
@@ -68,14 +54,14 @@ namespace Store.Web.Controllers
 
         //Оставил реализацию по-умолчанию
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutOrder(int id, Order order)
+        public async Task<IActionResult> UpdateOrder(int id, Order order)
         {
             if (id != order.Id)
             {
                 return BadRequest("");
             }
 
-            if (await orderRepository.Put(id, order))
+            if (await orderService.Update(id, order))
             {
                 return NoContent();
             }
@@ -88,30 +74,10 @@ namespace Store.Web.Controllers
         [HttpPost]
         public async Task<ActionResult<Order>> CreateOrder(Order order)
         {
-            if (!await orderRepository.IsValidOrder(order))
+            if (!await orderService.TryToCreate(order))
             {
                 return BadRequest();
-            }
-
-            decimal sum = 0;
-
-            foreach (LineBuffer item in order.Items)
-            {
-                await productListRepository.CreateOrUpdate(item);
-                await lineItemsRepository.Create(item);
-                sum += await orderRepository.GetSum(item);
-            }
-
-            if (sum == default)
-            {
-                return BadRequest();
-            }
-
-            order.Items = null;
-
-            await customerOrderRepository.Create(order, sum);
-            await customerInvestmentRepository.CreateOrUpdate(order, sum);
-            await orderRepository.Create(order);
+            }           
 
             return Ok();
         }
@@ -120,12 +86,14 @@ namespace Store.Web.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<Order>> DeleteOrder(int id)
         {
-            if (await orderRepository.Delete(id))
+            var order = await orderService.Delete(id);
+
+            if (order == null)
             {
-                return NoContent();
+                return NotFound();
             }
 
-            return NotFound();
+            return order;
         }
 
     }

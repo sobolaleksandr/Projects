@@ -32,16 +32,16 @@ namespace Store.Memory
 
             Customer customer = await _context.Customers.FindAsync(order.Customer.Email);
 
-            //проверяем существует ли клиент
-            if (customer != null)
-            {
-                order.Customer = null;
-            }
-
             //сверяем id клиента с его id в заказе
             if (order.Customer.Email != order.CustomerEmail)
             {
                 return false;
+            }
+
+            //проверяем существует ли клиент
+            if (customer != null)
+            {
+                order.Customer = null;
             }
 
             //проверяем пустой ли список
@@ -88,17 +88,9 @@ namespace Store.Memory
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<CustomerOrder>> Get(string id)
-        {
-            var _context = dbContextFactory.Create(typeof(OrderRepository));
 
-            return await _context.CustomerOrders
-                .AsNoTracking()
-                .Where(m => m.CustomerEmail == id)
-                .ToListAsync();
-        }
 
-        public async Task<IEnumerable<string>> GetAll(decimal sum)
+        public async Task<IEnumerable<string>> GetAllBySum(decimal sum)
         {
             var _context = dbContextFactory.Create(typeof(OrderRepository));
 
@@ -110,23 +102,23 @@ namespace Store.Memory
                 .ToListAsync();
         }
 
-        public async Task<bool> Delete(int id)
+        public async Task<Order> Delete(int id)
         {
             var _context = dbContextFactory.Create(typeof(OrderRepository));
 
             var order = await _context.Orders.FindAsync(id);
             if (order == null)
             {
-                return false;
+                return null;
             }
 
             _context.Orders.Remove(order);
             await _context.SaveChangesAsync();
 
-            return true;
+            return order;
         }
 
-        public async Task<bool> Put(int id, Order order)
+        public async Task<bool> Update(int id, Order order)
         {
             var _context = dbContextFactory.Create(typeof(OrderRepository));
 
