@@ -93,7 +93,7 @@ namespace Store.Web.Controllers
                 return NotFound();
             }
 
-            return order;
+            return new ObjectResult(order);
         }
 
     }

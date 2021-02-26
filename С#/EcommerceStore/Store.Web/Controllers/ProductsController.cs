@@ -99,7 +99,7 @@ namespace Store.Web.Controllers
                 return NotFound();
             }
 
-            return product;
+            return new ObjectResult(product);
         }
     }
 }
