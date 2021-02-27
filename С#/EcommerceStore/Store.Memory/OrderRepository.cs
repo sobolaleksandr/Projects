@@ -32,6 +32,11 @@ namespace Store.Memory
 
             Customer customer = await _context.Customers.FindAsync(order.Customer.Email);
 
+            if (await _context.Orders.FindAsync(order.Number) != null)
+            {
+                return false;
+            }
+
             //сверяем id клиента с его id в заказе
             if (order.Customer.Email != order.CustomerEmail)
             {

@@ -17,7 +17,6 @@ namespace Store.Memory
         public EcommerceContext(DbContextOptions<EcommerceContext> options)
             : base(options)
         {
-            //Database.EnsureCreated();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -42,14 +41,7 @@ namespace Store.Memory
 
         private static void BuildCustomers(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Customer>(action =>
-            {
-                action.HasData(
-                new Customer { Name = "Alex", Email = "alex99@gmail.com" },
-                new Customer { Name = "Bob", Email = "bob_bob@yandex.com" },
-                new Customer { Name = "Tom", Email = "TomT@yahoo.com" }
-                );
-            });
+
         }
 
         private static void BuildLineBuffers(ModelBuilder modelBuilder)
