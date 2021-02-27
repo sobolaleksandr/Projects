@@ -26,16 +26,7 @@ namespace Store.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            //Взял инициализацию из примера
-            // Register the Swagger generator, defining 1 or more Swagger documents
-            services.AddSwaggerGen(c =>
-            {
-                // Set the comments path for the Swagger JSON and UI.
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                c.IncludeXmlComments(xmlPath);
-            });
-
+            services.AddSwaggerGen();
             services.AddHttpContextAccessor();
             services.AddEfRepositories(Configuration.GetConnectionString("DefaultConnection"));
             services.AddSingleton<ProductService>();
