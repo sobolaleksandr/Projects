@@ -30,9 +30,10 @@ namespace Store.Memory
         {
             var _context = dbContextFactory.Create(typeof(OrderRepository));
 
-            Customer customer = await _context.Customers.FindAsync(order.Customer.Email);
+            //Проверяем есть ли заказ в базе с таким номером
+            var result = await _context.Orders.Where(o => o.Number == order.Number).FirstOrDefaultAsync();
 
-            if (await _context.Orders.FindAsync(order.Number) != null)
+            if (result != null)
             {
                 return false;
             }
@@ -42,6 +43,8 @@ namespace Store.Memory
             {
                 return false;
             }
+
+            Customer customer = await _context.Customers.FindAsync(order.Customer.Email);
 
             //проверяем существует ли клиент
             if (customer != null)

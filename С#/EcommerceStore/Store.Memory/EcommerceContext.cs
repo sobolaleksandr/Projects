@@ -22,7 +22,6 @@ namespace Store.Memory
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             BuildProducts(modelBuilder);
-            BuildCustomers(modelBuilder);
             BuildOrders(modelBuilder);
             BuildLineBuffers(modelBuilder);
         }
@@ -37,11 +36,6 @@ namespace Store.Memory
                 new Product { Name = "apple", Price = 100 }
                 );
             });
-        }
-
-        private static void BuildCustomers(ModelBuilder modelBuilder)
-        {
-
         }
 
         private static void BuildLineBuffers(ModelBuilder modelBuilder)
