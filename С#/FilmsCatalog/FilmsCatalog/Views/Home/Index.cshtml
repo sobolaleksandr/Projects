@@ -1,0 +1,26 @@
+﻿@using FilmsCatalog.Models
+@model IndexViewModel
+@*подключаем все tag-хелперы*@
+@addTagHelper *, FilmsCatalog
+@{
+    ViewData["Title"] = "Каталог фильмов";
+}
+<h1>Список фильмов</h1>
+<a asp-action="Create">Добавить фильм</a>
+<table class="table">
+    <tr><th>Название</th><th>Описание</th><th>Год выпуска</th><th>Режисер</th></tr>
+    @foreach (Movie m in Model.Movies)
+    {
+<tr>
+    <td>@m.Title</td>
+    <td>@m.Description</td>
+    <td>@m.Year</td>
+    <td>@m.Producer</td>
+    <td>
+        <a asp-action="Details" asp-controller="Home" asp-route-id="@m.ID">Подробнее</a> |
+        <a asp-action="Edit" asp-controller="Home" asp-route-id="@m.ID">Изменить</a>
+    </td>
+</tr>
+    }
+</table>
+<page-link page-model="Model.PageViewModel" page-action="Index"></page-link>
