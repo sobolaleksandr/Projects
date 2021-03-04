@@ -38,7 +38,7 @@ namespace FilmsCatalog.Controllers
             return NotFound();
         }
 
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> CreateOrEdit(int? id)
         {
             if (_signInManager.IsSignedIn(User))
             {
@@ -54,63 +54,45 @@ namespace FilmsCatalog.Controllers
                         return RedirectToAction(nameof(BadLogin));
                     }
                 }
-                return NotFound();
-            }
-            return RedirectToAction(nameof(BadLogin));
-        }
 
-        [HttpPost]
-        public async Task<IActionResult> Edit(MovieViewModel mvm)
-        {
-            Movie movie = new Movie
-            {
-                ID = mvm.ID,
-                Title = mvm.Title,
-                Description = mvm.Description,
-                Year = mvm.Year,
-                Producer = mvm.Producer,
-                Added = User.Identity.Name
-            };
-
-            if (mvm.Poster != null)
-            {
-                movie.Poster = FormatImage(mvm.Poster);
-            }
-
-            db.Movies.Update(movie);
-            await db.SaveChangesAsync();
-            return RedirectToAction("Index");
-        }
-
-        public IActionResult Create()
-        {
-            if (_signInManager.IsSignedIn(User))
-            {
                 return View();
             }
             return RedirectToAction(nameof(BadLogin));
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(MovieViewModel mvm)
+        public async Task<IActionResult> CreateOrEdit(MovieViewModel mvm)
         {
-            Movie movie = new Movie
+            if (_signInManager.IsSignedIn(User))
             {
-                Title = mvm.Title,
-                Description = mvm.Description,
-                Year = mvm.Year,
-                Producer = mvm.Producer,
-                Added = User.Identity.Name
-            };
+                Movie movie = new Movie
+                {
+                    ID = mvm.ID,
+                    Title = mvm.Title,
+                    Description = mvm.Description,
+                    Year = mvm.Year,
+                    Producer = mvm.Producer,
+                    Added = User.Identity.Name
+                };
 
-            if (mvm.Poster != null)
-            {
-                movie.Poster = FormatImage(mvm.Poster);
+                if (mvm.Poster != null)
+                {
+                    movie.Poster = FormatImage(mvm.Poster);
+                }
+
+                if (mvm.ID == 0)
+                {
+                    db.Movies.Add(movie);
+                }
+                else
+                {
+                    db.Movies.Update(movie);
+                }
+                await db.SaveChangesAsync();
+                return RedirectToAction("Index");
             }
 
-            db.Movies.Add(movie);
-            await db.SaveChangesAsync();
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(BadLogin));
         }
 
         private byte[] FormatImage(IFormFile poster)

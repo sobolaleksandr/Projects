@@ -6,7 +6,7 @@
     ViewData["Title"] = "Каталог фильмов";
 }
 <h1>Список фильмов</h1>
-<a asp-action="Create">Добавить фильм</a>
+<a asp-action="CreateOrEdit">Добавить фильм</a>
 <table class="table">
     <tr><th>Название</th><th>Описание</th><th>Год выпуска</th><th>Режисер</th></tr>
     @foreach (Movie m in Model.Movies)
@@ -18,7 +18,7 @@
     <td>@m.Producer</td>
     <td>
         <a asp-action="Details" asp-controller="Home" asp-route-id="@m.ID">Подробнее</a> |
-        <a asp-action="Edit" asp-controller="Home" asp-route-id="@m.ID">Изменить</a>
+        <a asp-action="CreateOrEdit" asp-controller="Home" asp-route-id="@m.ID">Изменить</a>
     </td>
 </tr>
     }
