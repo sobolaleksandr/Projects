@@ -1,27 +1,3 @@
-/*
-
-Copyright (c) 2011-2016 Andrey Nasonov
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
-*/
-
 #include "imageio.hpp"
 
 #include <vector>
@@ -38,7 +14,7 @@ static inline unsigned char f2b(float x)
 	else if (x > 255.0f)
 		return 255;
 	else
-		return (unsigned char)x;
+		return (unsigned char)(x);
 }
 
 // =======================================================================================================
@@ -90,6 +66,7 @@ int LockedBitmap::Stride() const { return bitmapdata.Stride; }
 void* LockedBitmap::Data() const { return bitmapdata.Scan0; }
 
 // =======================================================================================================
+
 
 static int GetEncoderClsid(const WCHAR* format, CLSID* pClsid)
 {
@@ -195,90 +172,24 @@ static std::unique_ptr<Gdiplus::Bitmap> ImageToBitmap(const ImageBase<PixelType>
 	return B;
 }
 
-// -----------------------------------------------------------------------------------------------
-
-GrayscaleFloatImage ImageIO::BitmapToGrayscaleFloatImage(Gdiplus::Bitmap &B)
+ColorFloatImage ImageIO::BitmapToColorFloatImage(Gdiplus::Bitmap &B, float brightAdjust)
 {
-	return BitmapToImage<float>(B, [](ColorBytePixel p) { return 0.114f * p.b + 0.587f * p.g + 0.299f * p.r; });
+	return BitmapToImage<ColorFloatPixel>(B, [&](ColorBytePixel p) 
+		{ return ColorFloatPixel(p.b+brightAdjust, p.g+brightAdjust , p.r+brightAdjust); });
 }
 
-GrayscaleByteImage ImageIO::BitmapToGrayscaleByteImage(Gdiplus::Bitmap &B)
+ColorFloatImage ImageIO::FileToColorFloatImage(const char* filename, float brightAdjust)
 {
-	return BitmapToImage<unsigned char>(B, [](ColorBytePixel p) { return (unsigned char)(0.114f * p.b + 0.587f * p.g + 0.299f * p.r); });
-}
+	int bufsize = MultiByteToWideChar(CP_UTF8, 0, filename, -1, nullptr, 0);
+	std::unique_ptr<wchar_t[]> buf(new wchar_t[bufsize + 1]);
+	MultiByteToWideChar(CP_UTF8, 0, filename, -1, buf.get(), bufsize);
+	buf[bufsize] = 0;
 
-ColorFloatImage ImageIO::BitmapToColorFloatImage(Gdiplus::Bitmap &B)
-{
-	return BitmapToImage<ColorFloatPixel>(B, [](ColorBytePixel p) { return ColorFloatPixel(p.b, p.g, p.r); });
-}
-
-ColorByteImage ImageIO::BitmapToColorByteImage(Gdiplus::Bitmap &B)
-{
-	return BitmapToImage<ColorBytePixel>(B, [](ColorBytePixel p) { return p; });
+	Gdiplus::Bitmap B(buf.get());
+	return BitmapToColorFloatImage(B, brightAdjust);
 }
 
 // -----------------------------------------------------------------------------------------------
-
-
-GrayscaleFloatImage ImageIO::FileToGrayscaleFloatImage(const char* filename)
-{
-	int bufsize = MultiByteToWideChar(CP_UTF8, 0, filename, -1, nullptr, 0);
-	std::unique_ptr<wchar_t[]> buf(new wchar_t[bufsize + 1]);
-	MultiByteToWideChar(CP_UTF8, 0, filename, -1, buf.get(), bufsize);
-	buf[bufsize] = 0;
-
-	Gdiplus::Bitmap B(buf.get());
-	return BitmapToGrayscaleFloatImage(B);
-}
-
-GrayscaleByteImage ImageIO::FileToGrayscaleByteImage(const char* filename)
-{
-	int bufsize = MultiByteToWideChar(CP_UTF8, 0, filename, -1, nullptr, 0);
-	std::unique_ptr<wchar_t[]> buf(new wchar_t[bufsize + 1]);
-	MultiByteToWideChar(CP_UTF8, 0, filename, -1, buf.get(), bufsize);
-	buf[bufsize] = 0;
-
-	Gdiplus::Bitmap B(buf.get());
-	return BitmapToGrayscaleByteImage(B);
-}
-
-ColorFloatImage ImageIO::FileToColorFloatImage(const char* filename)
-{
-	int bufsize = MultiByteToWideChar(CP_UTF8, 0, filename, -1, nullptr, 0);
-	std::unique_ptr<wchar_t[]> buf(new wchar_t[bufsize + 1]);
-	MultiByteToWideChar(CP_UTF8, 0, filename, -1, buf.get(), bufsize);
-	buf[bufsize] = 0;
-
-	Gdiplus::Bitmap B(buf.get());
-	return BitmapToColorFloatImage(B);
-}
-
-ColorByteImage ImageIO::FileToColorByteImage(const char* filename)
-{
-	int bufsize = MultiByteToWideChar(CP_UTF8, 0, filename, -1, nullptr, 0);
-	std::unique_ptr<wchar_t[]> buf(new wchar_t[bufsize + 1]);
-	MultiByteToWideChar(CP_UTF8, 0, filename, -1, buf.get(), bufsize);
-	buf[bufsize] = 0;
-
-	Gdiplus::Bitmap B(buf.get());
-	return BitmapToColorByteImage(B);
-}
-
-// -----------------------------------------------------------------------------------------------
-
-std::unique_ptr<Gdiplus::Bitmap> ImageIO::ImageToBitmap(const GrayscaleFloatImage &image)
-{
-	return ::ImageToBitmap(image, [](float x)
-	{
-		unsigned char v = f2b(x);
-		return ColorBytePixel(v, v, v);	
-	});
-}
-
-std::unique_ptr<Gdiplus::Bitmap> ImageIO::ImageToBitmap(const GrayscaleByteImage &image)
-{
-	return ::ImageToBitmap(image, [](unsigned char x) { return ColorBytePixel(x, x, x); });
-}
 
 std::unique_ptr<Gdiplus::Bitmap> ImageIO::ImageToBitmap(const ColorFloatImage &image)
 {
@@ -300,20 +211,8 @@ static void BitmapToFile(Gdiplus::Bitmap &B, const char *filename)
 	buf[bufsize] = 0;
 
 	CLSID pngClsid;
-	GetEncoderClsid(L"image/png", &pngClsid);
+	GetEncoderClsid(L"image/jpeg", &pngClsid);
 	B.Save(buf.get(), &pngClsid);
-}
-
-void ImageIO::ImageToFile(const GrayscaleFloatImage &image, const char *filename)
-{
-	std::unique_ptr<Gdiplus::Bitmap> B = ImageToBitmap(image);
-	BitmapToFile(*B, filename);
-}
-
-void ImageIO::ImageToFile(const GrayscaleByteImage &image, const char *filename)
-{
-	std::unique_ptr<Gdiplus::Bitmap> B = ImageToBitmap(image);
-	BitmapToFile(*B, filename);
 }
 
 void ImageIO::ImageToFile(const ColorFloatImage &image, const char *filename)
@@ -366,37 +265,6 @@ struct BITMAPINFOHEADER
 };
 
 #pragma pack(pop)
-
-
-GrayscaleFloatImage ImageIO::FileToGrayscaleFloatImage(const char* filename)
-{
-	ColorByteImage img = FileToColorByteImage(filename);
-	GrayscaleFloatImage res(img.Width(), img.Height());
-
-	for (int j = 0; j < img.Height(); j++)
-		for (int i = 0; i < img.Width(); i++)
-		{
-			auto p = img(i, j);
-			res(i, j) = 0.114f * p.b + 0.587f * p.g + 0.299f * p.r;
-		}
-
-	return res;
-}
-
-GrayscaleByteImage ImageIO::FileToGrayscaleByteImage(const char* filename)
-{
-	ColorByteImage img = FileToColorByteImage(filename);
-	GrayscaleByteImage res(img.Width(), img.Height());
-
-	for (int j = 0; j < img.Height(); j++)
-		for (int i = 0; i < img.Width(); i++)
-		{
-			auto p = img(i, j);
-			res(i, j) = (unsigned char)(0.114f * p.b + 0.587f * p.g + 0.299f * p.r);
-		}
-
-	return res;
-}
 
 ColorFloatImage ImageIO::FileToColorFloatImage(const char* filename)
 {
@@ -473,35 +341,6 @@ ColorByteImage ImageIO::FileToColorByteImage(const char* filename)
 	}
 
 	return res;
-}
-
-void ImageIO::ImageToFile(const GrayscaleFloatImage &image, const char *filename)
-{
-	ColorByteImage res(image.Width(), image.Height());
-
-	for (int j = 0; j < image.Height(); j++)
-		for (int i = 0; i < image.Width(); i++)
-		{
-			auto p = f2b(image(i, j));
-			res(i, j) = ColorBytePixel(p, p, p);
-		}
-
-	ImageToFile(res, filename);
-}
-
-void ImageIO::ImageToFile(const GrayscaleByteImage &image, const char *filename)
-{
-	ColorByteImage res(image.Width(), image.Height());
-
-	for (int j = 0; j < image.Height(); j++)
-		for (int i = 0; i < image.Width(); i++)
-		{
-			auto p = image(i, j);
-			res(i, j) = ColorBytePixel(p, p, p);
-		}
-
-	ImageToFile(res, filename);
-
 }
 
 void ImageIO::ImageToFile(const ColorFloatImage &image, const char *filename)
