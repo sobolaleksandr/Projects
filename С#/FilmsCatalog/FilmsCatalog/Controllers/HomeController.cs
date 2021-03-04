@@ -1,5 +1,6 @@
 ﻿using FilmsCatalog.Data;
 using FilmsCatalog.Models;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,22 +17,25 @@ namespace FilmsCatalog.Controllers
 {
     public class HomeController : Controller
     {
-        ApplicationDbContext db;
+        private readonly ApplicationDbContext _context;
         private readonly SignInManager<User> _signInManager;
+        private readonly IWebHostEnvironment _appEnvironment;
 
         public HomeController(
             SignInManager<User> signInManager,
-            ApplicationDbContext context)
+            ApplicationDbContext context,
+            IWebHostEnvironment appEnvironment)
         {
-            db = context;
+            _context = context;
             _signInManager = signInManager;
+            _appEnvironment = appEnvironment;
         }
 
         public async Task<IActionResult> Details(int? id)
         {
             if (id != null)
             {
-                Movie movie = await db.Movies.FirstOrDefaultAsync(p => p.ID == id);
+                Movie movie = await _context.Movies.FirstOrDefaultAsync(p => p.ID == id);
                 if (movie != null)
                     return View(movie);
             }
@@ -44,7 +48,7 @@ namespace FilmsCatalog.Controllers
             {
                 if (id != null)
                 {
-                    Movie movie = await db.Movies.FirstOrDefaultAsync(p => p.ID == id);
+                    Movie movie = await _context.Movies.FirstOrDefaultAsync(p => p.ID == id);
                     if (movie != null)
                     {
                         if (movie.Added == User.Identity.Name)
@@ -75,26 +79,62 @@ namespace FilmsCatalog.Controllers
                     Added = User.Identity.Name
                 };
 
-                if (mvm.Poster != null)
-                {
-                    movie.Poster = FormatImage(mvm.Poster);
-                }
+                movie.Poster = await SaveFileReturnName(mvm.Poster);
+
+                //if (mvm.Poster != null)
+                //        movie.Poster = FormatImage(mvm.Poster);
 
                 if (mvm.ID == 0)
                 {
-                    db.Movies.Add(movie);
+                    _context.Movies.Add(movie);
                 }
                 else
                 {
-                    db.Movies.Update(movie);
+                    _context.Movies.Update(movie);
                 }
-                await db.SaveChangesAsync();
+
+                await _context.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
 
             return RedirectToAction(nameof(BadLogin));
         }
+        //Сохранение в файловой системе для string Poster
+        private async Task<string> SaveFileReturnName(IFormFile uploadedFile)
+        {
+            if (uploadedFile != null)
+            {
+                if (IsImage(uploadedFile, 1500000, resolutions))
+                {
+                    // путь к папке Files
+                    string path = "/Files/" + uploadedFile.FileName;
+                    // сохраняем файл в папку Files в каталоге wwwroot
+                    using (var fileStream = new FileStream(_appEnvironment.WebRootPath + path, FileMode.Create))
+                    {
+                        await uploadedFile.CopyToAsync(fileStream);
+                    }
 
+                    return path;
+                }
+            }
+            return null;
+        }
+
+        List<string> resolutions = new List<string>
+        {
+            "image/jpeg","image/bmp","image/jpg","image/gif","image/png","image/png"
+        };
+
+        private bool IsImage(IFormFile uploadedFile, long sizeBytes, List<string> resoulutions)
+        {
+            if (resolutions.Contains(uploadedFile.ContentType) &&                
+                uploadedFile.Length < sizeBytes)
+                return true;
+            else
+                return false;
+        }
+
+        //Выгрузка в БД для byte[] Poster
         private byte[] FormatImage(IFormFile poster)
         {
             byte[] imageData = null;
@@ -110,7 +150,7 @@ namespace FilmsCatalog.Controllers
         public async Task<IActionResult> Index(int page = 1)
         {
             int pageSize = 10;
-            IQueryable<Movie> source = db.Movies;
+            IQueryable<Movie> source = _context.Movies;
             var count = await source.CountAsync();
             var items = await source.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
