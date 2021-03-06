@@ -1,0 +1,98 @@
+﻿
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace HallOfFame.Data
+{
+    public class PeopleRepository : IPeopleRepository
+    {
+        private readonly HallOfFameDbContext _context;
+
+        public PeopleRepository(HallOfFameDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<IEnumerable<Person>> GetPeople()
+        {
+            var people = await _context.People.Include(p => p.SkillsCollection)
+                                              .ToArrayAsync();
+            return people;
+        }
+
+        public async Task<Person> GetPerson(long id)
+        {
+            var person = await _context.People.Where(p=>p.Id == id)
+                                              .Include(p=>p.SkillsCollection)
+                                              .FirstOrDefaultAsync();                
+            return person;
+        }
+
+        public async Task<bool> TryToUpdatePerson(long id, Person person)
+        {
+            _context.People.Update(person);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!PersonExists(id))
+                {
+                    return false;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return true;
+        }
+
+        public async Task<Person> DeletePerson(long id)
+        {
+            var person = await _context.People.FindAsync(id);
+
+            if (person == null)
+                return null;
+
+            _context.People.Remove(person);
+            await _context.SaveChangesAsync();
+
+            return person;
+        }
+
+        private bool PersonExists(long id)
+        {
+            return _context.People.Any(e => e.Id == id);
+        }
+
+        public async Task<bool> TryToCreatePerson(Person person)
+        {
+            _context.People.Add(person);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                if (PersonExists(person.Id))
+                {
+                    return false;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return true;
+        }
+    }
+
+}
