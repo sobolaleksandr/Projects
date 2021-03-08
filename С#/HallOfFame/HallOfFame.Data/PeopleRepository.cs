@@ -13,6 +13,7 @@ namespace HallOfFame.Data
         public PeopleRepository(HallOfFameDbContext context)
         {
             _context = context;
+
         }
 
         public async Task<IEnumerable<Person>> GetPeople()

@@ -20,10 +20,11 @@ namespace HallOfFame.Web.Controllers
 
         [Route("api/v1/persons")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Person>>> GetPersons()
+        public async Task<IEnumerable<Person>> GetPersons()
         {
             var persons = await _peopleRepository.GetPeople();
-            return new ObjectResult(persons);
+
+            return persons;
         }
 
         [HttpGet("api/v1/person/{id}")]
@@ -41,7 +42,7 @@ namespace HallOfFame.Web.Controllers
         [HttpPut]
         public async Task<IActionResult> CreatePerson(Person person)
         {
-            if (person != null)
+            if (person != null && ModelState.IsValid)
                 if (await _peopleRepository.TryToCreatePerson(person))
                     return Ok();
 
@@ -49,28 +50,20 @@ namespace HallOfFame.Web.Controllers
         }
 
         [HttpPost("api/v1/person/{id?}")]
-        public async Task<ActionResult<Person>> UpdatePerson(long? id, Person person)
+        public async Task<IActionResult> UpdatePerson(long? id, Person person)
         {
-            if (id != person.Id)
-            {
-                return BadRequest();
-            }
+            if (ModelState.IsValid && id.HasValue)
+                if (id == person.Id)
+                    if (await _peopleRepository.TryToUpdatePerson(id.Value, person))
+                        return Ok();
+                    else
+                        return NotFound();
 
-            bool result;
-
-            if (id.HasValue)
-                result = await _peopleRepository.TryToUpdatePerson(id.Value, person);
-            else
-                result = await _peopleRepository.TryToUpdatePerson(person.Id, person);
-
-            if (result)
-                return Ok();
-
-            return NotFound();
+            return BadRequest();
         }
 
         [HttpDelete("api/v1/person/{id}")]
-        public async Task<ActionResult<Person>> DeletePerson(long id)
+        public async Task<IActionResult> DeletePerson(long id)
         {
             var person = await _peopleRepository.DeletePerson(id);
             if (person == null)
