@@ -81,14 +81,14 @@ namespace HallOfFame.Tests
             // Arrange
             var mock = new Mock<IPeopleRepository>();
             mock.Setup(repo => repo.GetPeople())
-                .ReturnsAsync(GetPeople);
+                .Returns(Task.FromResult(GetPeople().ToArray()));
 
             var controller = new PeopleController(mock.Object);
             // Act
             var result = await controller.GetPersons();
 
             // Assert
-            var viewResult = Assert.IsAssignableFrom<IEnumerable<Person>>(result);
+            var viewResult = Assert.IsAssignableFrom<Person[]>(result);
             Assert.Equal(2, viewResult.Count());
         }
 

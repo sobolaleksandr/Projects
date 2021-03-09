@@ -13,10 +13,9 @@ namespace HallOfFame.Data
         public PeopleRepository(HallOfFameDbContext context)
         {
             _context = context;
-
         }
 
-        public async Task<IEnumerable<Person>> GetPeople()
+        public async Task<Person[]> GetPeople()
         {
             var people = await _context.People.Include(p => p.SkillsCollection)
                                               .ToArrayAsync();
@@ -41,7 +40,7 @@ namespace HallOfFame.Data
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!PersonExists(id))
+                if (!(await PersonExists(id)))
                 {
                     return false;
                 }
@@ -67,9 +66,9 @@ namespace HallOfFame.Data
             return person;
         }
 
-        private bool PersonExists(long id)
+        public async Task<bool> PersonExists(long id)
         {
-            return _context.People.Any(e => e.Id == id);
+            return await _context.People.AnyAsync(e => e.Id == id);
         }
 
         public async Task<bool> TryToCreatePerson(Person person)
@@ -82,7 +81,7 @@ namespace HallOfFame.Data
             }
             catch (DbUpdateException)
             {
-                if (PersonExists(person.Id))
+                if (await PersonExists(person.Id))
                 {
                     return false;
                 }

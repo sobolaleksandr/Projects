@@ -20,7 +20,7 @@ namespace HallOfFame.Web.Controllers
 
         [Route("api/v1/persons")]
         [HttpGet]
-        public async Task<IEnumerable<Person>> GetPersons()
+        public async Task<Person[]> GetPersons()
         {
             var persons = await _peopleRepository.GetPeople();
 

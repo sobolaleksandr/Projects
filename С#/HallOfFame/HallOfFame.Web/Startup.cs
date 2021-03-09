@@ -30,7 +30,8 @@ namespace HallOfFame.Web
             services.AddControllers();
             services.AddSwaggerGen();
             string connection = Configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<HallOfFameDbContext>(options => options.UseSqlServer(connection));
+            services.AddDbContext<HallOfFameDbContext>(options => options.UseSqlServer(
+                "Server=(localdb)\\mssqllocaldb;Database=halloffamedb;Trusted_Connection=True;MultipleActiveResultSets=true"));
             services.AddScoped<IPeopleRepository, PeopleRepository>();
         }
 
