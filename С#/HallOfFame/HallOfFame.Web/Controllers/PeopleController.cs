@@ -43,7 +43,8 @@ namespace HallOfFame.Web.Controllers
         public async Task<IActionResult> CreatePerson(Person person)
         {
             if (person != null && ModelState.IsValid)
-                if (await _peopleRepository.TryToCreatePerson(person))
+                if (person.Id == 0)
+                    if (await _peopleRepository.TryToCreatePerson(person))
                     return Ok();
 
             return BadRequest();

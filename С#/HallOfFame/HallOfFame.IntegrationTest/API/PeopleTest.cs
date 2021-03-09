@@ -96,7 +96,7 @@ namespace HallOfFame.IntegrationTest.API
         }
 
         [Fact]
-        internal async Task PutPerson_WithId_ReturnsInternalServerError()
+        internal async Task PutPerson_WithId_ReturnsBadRequest()
         {
             // Arrange
             Person person =
@@ -127,7 +127,7 @@ namespace HallOfFame.IntegrationTest.API
             var response = await _client.SendAsync(request);
 
             // Assert
-            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Fact]
