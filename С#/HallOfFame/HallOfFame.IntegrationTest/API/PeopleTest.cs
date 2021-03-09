@@ -96,6 +96,41 @@ namespace HallOfFame.IntegrationTest.API
         }
 
         [Fact]
+        internal async Task PutPerson_WithId_ReturnsInternalServerError()
+        {
+            // Arrange
+            Person person =
+            new Person
+            {
+                Id=1,
+                Name = "TestsName",
+                SkillsCollection =
+                new Skill[]
+                {
+                    new Skill
+                    {
+                        Name="TestSkill",
+                        Level = 9
+                    },
+                    new Skill
+                    {
+                        Name="TestSkill2",
+                        Level = 9
+                    }
+                }
+            };
+
+            var body = JsonConvert.SerializeObject(person);
+            var request = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/person/");
+            request.Content = new StringContent(body, Encoding.UTF8, "application/json");
+            // Act
+            var response = await _client.SendAsync(request);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        }
+
+        [Fact]
         internal async Task PutPerson_WithBadModel_ReturnsBadRequest()
         {
             // Arrange
@@ -159,7 +194,7 @@ namespace HallOfFame.IntegrationTest.API
 
             response.EnsureSuccessStatusCode();
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        }        
+        }
 
         internal async Task PostPerson_WithGoodModel_ReturnsOk()
         {
