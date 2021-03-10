@@ -13,7 +13,6 @@ namespace HallOfFame.Data
         public HallOfFameDbContext(DbContextOptions<HallOfFameDbContext> options)
             : base(options)
         {
-
         }
     }
 

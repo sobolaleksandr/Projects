@@ -11,9 +11,8 @@ namespace HallOfFame.Tests
 {
     public class PeopleControllerTests
     {
-        private IEnumerable<Person> GetPeople()
-        {
-            var newPerson = new Person[]
+        private IEnumerable<Person> GetPeople()=>
+            new Person[]
             {
                 new Person {
                 Name = "",
@@ -51,8 +50,6 @@ namespace HallOfFame.Tests
             }
             };
 
-            return newPerson;
-        }
 
         Person person =
         new Person
@@ -60,18 +57,18 @@ namespace HallOfFame.Tests
             Id = 1,
             Name = "",
             SkillsCollection =
-        new Skill[]
-            {
-                    new Skill
-                        {
-                            Name="agility",
-                            Level = 9
-                        },
-                        new Skill
-                        {
-                            Name="strength",
-                            Level = 9
-                        }
+            new Skill[]
+                {
+                new Skill
+                    {
+                        Name="agility",
+                        Level = 9
+                    },
+                new Skill
+                {
+                    Name="strength",
+                    Level = 9
+                }
             }
         };
 
@@ -208,6 +205,22 @@ namespace HallOfFame.Tests
         }
 
         [Fact]
+        public async Task CreatePerson_WithId_ReturnsBadRequest()
+        {
+            // Arrange
+            var mock = new Mock<IPeopleRepository>();
+            var controller = new PeopleController(mock.Object);
+            Person newPerson = new Person { Id = 1 };
+
+            // Act
+            var result = await controller.CreatePerson(newPerson);
+
+            // Assert
+            var viewResult = Assert.IsType<BadRequestResult>(result);
+            Assert.Equal(400, viewResult?.StatusCode);
+        }
+
+        [Fact]
         public async Task UpdatePerson_WithPersonAndGoodId_ReturnsOk()
         {
             // Arrange
@@ -244,7 +257,7 @@ namespace HallOfFame.Tests
         }
 
         [Fact]
-        public async Task UpdatePerson_WithNonExisting_ReturnsNotFound()
+        public async Task UpdatePerson_WithNonExistingPerson_ReturnsNotFound()
         {
             // Arrange
             long id = 1;
@@ -271,6 +284,22 @@ namespace HallOfFame.Tests
             var mock = new Mock<IPeopleRepository>();
             var controller = new PeopleController(mock.Object);
             controller.ModelState.AddModelError("Name", "Required");
+
+            // Act
+            var result = await controller.UpdatePerson(id, person);
+
+            // Assert
+            var viewResult = Assert.IsType<BadRequestResult>(result);
+            Assert.Equal(400, viewResult?.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdatePerson_WithNullId_ReturnsBadRequest()
+        {
+            // Arrange
+            long? id = null;
+            var mock = new Mock<IPeopleRepository>();
+            var controller = new PeopleController(mock.Object);
 
             // Act
             var result = await controller.UpdatePerson(id, person);

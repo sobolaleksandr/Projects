@@ -13,7 +13,7 @@ using System.Linq;
 using HallOfFame.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace HallOfFame.IntegrationTest.API
+namespace HallOfFame.IntegrationTest
 {
     public class PeopleTest
     {
