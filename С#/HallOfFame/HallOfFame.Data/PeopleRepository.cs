@@ -40,14 +40,7 @@ namespace HallOfFame.Data
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!(await PersonExists(id)))
-                {
-                    return false;
-                }
-                else
-                {
-                    throw;
-                }
+                return false;
             }
 
             return true;
@@ -66,11 +59,6 @@ namespace HallOfFame.Data
             return person;
         }
 
-        public async Task<bool> PersonExists(long id)
-        {
-            return await _context.People.AnyAsync(e => e.Id == id);
-        }
-
         public async Task<bool> TryToCreatePerson(Person person)
         {
             _context.People.Add(person);
@@ -81,14 +69,7 @@ namespace HallOfFame.Data
             }
             catch (DbUpdateException)
             {
-                if (await PersonExists(person.Id))
-                {
-                    return false;
-                }
-                else
-                {
-                    throw;
-                }
+                return false;
             }
 
             return true;

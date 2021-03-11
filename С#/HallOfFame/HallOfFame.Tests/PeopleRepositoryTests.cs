@@ -303,44 +303,5 @@ namespace HallOfFame.Tests
             }
         }
 
-        [Fact]
-        public async Task PersonExists_WithBadId_ReturnsFalse()
-        {
-            using (var context = new HallOfFameDbContext(ContextOptions))
-            {
-                var repo = new PeopleRepository(context);
-
-                var newPerson = new Person
-                {
-                    Id = 12,
-                    Name = "testPerson2",
-                };
-
-                var result = await repo.PersonExists(newPerson.Id);
-
-                Assert.False(result);
-            }
-        }
-
-        [Fact]
-        public async Task PersonExists_WithGoodId_ReturnsTrue()
-        {
-            using (var context = new HallOfFameDbContext(ContextOptions))
-            {
-                var repo = new PeopleRepository(context);
-
-                var newPerson = new Person
-                {
-                    Id = 2,
-                    Name = "testPerson2",
-                };
-
-                var result = await repo.PersonExists(newPerson.Id);
-
-                Assert.True(result);
-            }
-        }
-
-
     }
 }

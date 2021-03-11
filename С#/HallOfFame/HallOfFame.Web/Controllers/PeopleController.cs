@@ -39,18 +39,17 @@ namespace HallOfFame.Web.Controllers
         }
 
         [Route("api/v1/person")]
-        [HttpPut]
+        [HttpPost]
         public async Task<IActionResult> CreatePerson(Person person)
         {
             if (person != null && ModelState.IsValid)
-                if (person.Id == 0)
-                    if (await _peopleRepository.TryToCreatePerson(person))
+                if (await _peopleRepository.TryToCreatePerson(person))
                     return Ok();
 
             return BadRequest();
         }
 
-        [HttpPost("api/v1/person/{id?}")]
+        [HttpPut("api/v1/person/{id?}")]
         public async Task<IActionResult> UpdatePerson(long? id, Person person)
         {
             if (ModelState.IsValid && id.HasValue)

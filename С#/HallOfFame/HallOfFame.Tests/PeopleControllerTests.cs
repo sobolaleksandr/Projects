@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -195,22 +196,6 @@ namespace HallOfFame.Tests
             var mock = new Mock<IPeopleRepository>();
             var controller = new PeopleController(mock.Object);
             Person newPerson = null;
-
-            // Act
-            var result = await controller.CreatePerson(newPerson);
-
-            // Assert
-            var viewResult = Assert.IsType<BadRequestResult>(result);
-            Assert.Equal(400, viewResult?.StatusCode);
-        }
-
-        [Fact]
-        public async Task CreatePerson_WithId_ReturnsBadRequest()
-        {
-            // Arrange
-            var mock = new Mock<IPeopleRepository>();
-            var controller = new PeopleController(mock.Object);
-            Person newPerson = new Person { Id = 1 };
 
             // Act
             var result = await controller.CreatePerson(newPerson);

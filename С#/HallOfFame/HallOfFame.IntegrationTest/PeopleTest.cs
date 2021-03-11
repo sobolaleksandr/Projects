@@ -54,14 +54,14 @@ namespace HallOfFame.IntegrationTest
         [Fact] 
         public async Task PeopleTests()
         {
-            await PutPerson_WithGoodModel_ReturnsOk();
+            await CreatePerson_WithGoodModel_ReturnsOk();
             await GetPersons_ReturnsPersons();
-            await PostPerson_WithGoodModel_ReturnsOk();
+            await UpdatePerson_WithGoodModel_ReturnsOk();
             await GetPerson_ReturnsPerson();
             await DeletePerson_WithGoodId_ReturnsOk();
         }
 
-        internal async Task PutPerson_WithGoodModel_ReturnsOk()
+        internal async Task CreatePerson_WithGoodModel_ReturnsOk()
         {
             // Arrange
             Person person =
@@ -85,7 +85,7 @@ namespace HallOfFame.IntegrationTest
             };
 
             var body = JsonConvert.SerializeObject(person);
-            var request = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/person/");
+            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/person/");
             request.Content = new StringContent(body, Encoding.UTF8, "application/json");
             // Act
             var response = await _client.SendAsync(request);
@@ -96,7 +96,7 @@ namespace HallOfFame.IntegrationTest
         }
 
         [Fact]
-        internal async Task PutPerson_WithId_ReturnsBadRequest()
+        internal async Task CreatePerson_WithId_ReturnsBadRequest()
         {
             // Arrange
             Person person =
@@ -121,7 +121,7 @@ namespace HallOfFame.IntegrationTest
             };
 
             var body = JsonConvert.SerializeObject(person);
-            var request = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/person/");
+            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/person/");
             request.Content = new StringContent(body, Encoding.UTF8, "application/json");
             // Act
             var response = await _client.SendAsync(request);
@@ -131,7 +131,7 @@ namespace HallOfFame.IntegrationTest
         }
 
         [Fact]
-        internal async Task PutPerson_WithBadModel_ReturnsBadRequest()
+        internal async Task CreatePerson_WithBadModel_ReturnsBadRequest()
         {
             // Arrange
             Person person =
@@ -155,7 +155,7 @@ namespace HallOfFame.IntegrationTest
             };
 
             var body = JsonConvert.SerializeObject(person);
-            var request = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/person/");
+            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/person/");
             request.Content = new StringContent(body, Encoding.UTF8, "application/json");
             // Act
             var response = await _client.SendAsync(request);
@@ -165,13 +165,13 @@ namespace HallOfFame.IntegrationTest
         }
 
         [Fact]
-        internal async Task PutPerson_WithNull_ReturnsBadRequest()
+        internal async Task CreatePerson_WithNull_ReturnsBadRequest()
         {
             // Arrange
             Person person = null;
 
             var body = JsonConvert.SerializeObject(person);
-            var request = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/person/");
+            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/person/");
             request.Content = new StringContent(body, Encoding.UTF8, "application/json");
             // Act
             var response = await _client.SendAsync(request);
@@ -196,7 +196,7 @@ namespace HallOfFame.IntegrationTest
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
 
-        internal async Task PostPerson_WithGoodModel_ReturnsOk()
+        internal async Task UpdatePerson_WithGoodModel_ReturnsOk()
         {
             // Arrange
             testPerson.SkillsCollection[0].Level = 1;
@@ -204,7 +204,7 @@ namespace HallOfFame.IntegrationTest
             long id = testPerson.Id;
 
             var body = JsonConvert.SerializeObject(testPerson);
-            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/person/{id}");
+            var request = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/person/{id}");
             request.Content = new StringContent(body, Encoding.UTF8, "application/json");
             // Act
             var response = await _client.SendAsync(request);
@@ -215,13 +215,13 @@ namespace HallOfFame.IntegrationTest
         }
 
         [Fact]
-        internal async Task PostPerson_WithNullId_ReturnBadRequest()
+        internal async Task UpdatePerson_WithNullId_ReturnBadRequest()
         {
             // Arrange
             long? id = testPerson.Id;
 
             var body = JsonConvert.SerializeObject(testPerson);
-            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/person/{id}");
+            var request = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/person/{id}");
             request.Content = new StringContent(body, Encoding.UTF8, "application/json");
             // Act
             var response = await _client.SendAsync(request);
@@ -231,7 +231,7 @@ namespace HallOfFame.IntegrationTest
         }
 
         [Fact]
-        internal async Task PostPerson_WithBadId_ReturnBadRequest()
+        internal async Task UpdatePerson_WithBadId_ReturnBadRequest()
         {
             // Arrange
             long id = 1;
@@ -257,7 +257,7 @@ namespace HallOfFame.IntegrationTest
             };
 
             var body = JsonConvert.SerializeObject(testPerson);
-            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/person/{id}");
+            var request = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/person/{id}");
             request.Content = new StringContent(body, Encoding.UTF8, "application/json");
             // Act
             var response = await _client.SendAsync(request);
@@ -267,7 +267,7 @@ namespace HallOfFame.IntegrationTest
         }
 
         [Fact]
-        internal async Task PostPerson_WithBadModel_ReturnsBadRequest()
+        internal async Task UpdatePerson_WithBadModel_ReturnsBadRequest()
         {
             // Arrange
             long id = 1;
@@ -294,7 +294,7 @@ namespace HallOfFame.IntegrationTest
                         };
 
             var body = JsonConvert.SerializeObject(testPerson);
-            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/person/{id}");
+            var request = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/person/{id}");
             request.Content = new StringContent(body, Encoding.UTF8, "application/json");
             // Act
             var response = await _client.SendAsync(request);
@@ -304,7 +304,7 @@ namespace HallOfFame.IntegrationTest
         }
 
         [Fact]
-        internal async Task PostPerson_WithNonExistingPerson_ReturnsNotFound()
+        internal async Task UpdatePerson_WithNonExistingPerson_ReturnsNotFound()
         {
             // Arrange
             long id = 12;
@@ -331,7 +331,7 @@ namespace HallOfFame.IntegrationTest
             };
 
             var body = JsonConvert.SerializeObject(person);
-            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/person/{id}");
+            var request = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/person/{id}");
             request.Content = new StringContent(body, Encoding.UTF8, "application/json");
             // Act
             var response = await _client.SendAsync(request);
@@ -368,7 +368,7 @@ namespace HallOfFame.IntegrationTest
         internal async Task GetPerson_ReturnsNotFound()
         {
             // Arrange
-            long id = 1;
+            long id = 9999;
             var request = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/person/{id}");
 
             // Act
