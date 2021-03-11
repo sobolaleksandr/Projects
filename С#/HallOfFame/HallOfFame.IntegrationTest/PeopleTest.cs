@@ -31,6 +31,7 @@ namespace HallOfFame.IntegrationTest
             [JsonProperty(PropertyName = "SkillsCollection")]
             public List<SkillJson> SkillsCollection { get; set; }
         }
+
         public class SkillJson
         {
             [JsonProperty(PropertyName = "Id")]
@@ -85,8 +86,11 @@ namespace HallOfFame.IntegrationTest
             };
 
             var body = JsonConvert.SerializeObject(person);
-            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/person/");
-            request.Content = new StringContent(body, Encoding.UTF8, "application/json");
+            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/person/")
+            {
+                Content = new StringContent(body, Encoding.UTF8, "application/json")
+            };
+
             // Act
             var response = await _client.SendAsync(request);
 
@@ -96,67 +100,30 @@ namespace HallOfFame.IntegrationTest
         }
 
         [Fact]
-        internal async Task CreatePerson_WithId_ReturnsBadRequest()
-        {
-            // Arrange
-            Person person =
-            new Person
-            {
-                Id=1,
-                Name = "TestsName",
-                SkillsCollection =
-                new Skill[]
-                {
-                    new Skill
-                    {
-                        Name="TestSkill",
-                        Level = 9
-                    },
-                    new Skill
-                    {
-                        Name="TestSkill2",
-                        Level = 9
-                    }
-                }
-            };
-
-            var body = JsonConvert.SerializeObject(person);
-            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/person/");
-            request.Content = new StringContent(body, Encoding.UTF8, "application/json");
-            // Act
-            var response = await _client.SendAsync(request);
-
-            // Assert
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        }
-
-        [Fact]
         internal async Task CreatePerson_WithBadModel_ReturnsBadRequest()
         {
             // Arrange
             Person person =
-            new Person
-            {
-                Name = "TestsName",
-                SkillsCollection =
-                new Skill[]
-                {
-                    new Skill
+                    new Person
                     {
-                        Name="TestSkill",
-                        Level = 11
-                    },
-                    new Skill
-                    {
-                        Name="TestSkill2",
-                        Level = 9
-                    }
-                }
-            };
+                        Name = "TestName",
+                        SkillsCollection =
+                        new Skill[]
+                        {
+                            new Skill
+                            {
+                                Name="TestSkill",
+                                Level = 11
+                            }
+                        }
+                    };
 
             var body = JsonConvert.SerializeObject(person);
-            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/person/");
-            request.Content = new StringContent(body, Encoding.UTF8, "application/json");
+            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/person/")
+            {
+                Content = new StringContent(body, Encoding.UTF8, "application/json")
+            };
+
             // Act
             var response = await _client.SendAsync(request);
 
@@ -171,8 +138,11 @@ namespace HallOfFame.IntegrationTest
             Person person = null;
 
             var body = JsonConvert.SerializeObject(person);
-            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/person/");
-            request.Content = new StringContent(body, Encoding.UTF8, "application/json");
+            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/person/")
+            {
+                Content = new StringContent(body, Encoding.UTF8, "application/json")
+            };
+
             // Act
             var response = await _client.SendAsync(request);
 
@@ -188,10 +158,10 @@ namespace HallOfFame.IntegrationTest
             // Act
             var response = await _client.SendAsync(request);
             var content = await response.Content.ReadAsStringAsync();
-            List<PersonJson> jsonPerson = JsonConvert.DeserializeObject<List<PersonJson>>(content);
-            testPerson = jsonPerson.Where(p => p.Name == "TestsName").FirstOrDefault();
-            // Assert
+            List<PersonJson> jsonPersons = JsonConvert.DeserializeObject<List<PersonJson>>(content);
+            testPerson = jsonPersons.Where(p => p.Name == "TestsName").FirstOrDefault();
 
+            // Assert
             response.EnsureSuccessStatusCode();
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
@@ -204,8 +174,10 @@ namespace HallOfFame.IntegrationTest
             long id = testPerson.Id;
 
             var body = JsonConvert.SerializeObject(testPerson);
-            var request = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/person/{id}");
-            request.Content = new StringContent(body, Encoding.UTF8, "application/json");
+            var request = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/person/{id}")
+            {
+                Content = new StringContent(body, Encoding.UTF8, "application/json")
+            };
             // Act
             var response = await _client.SendAsync(request);
 
@@ -218,11 +190,30 @@ namespace HallOfFame.IntegrationTest
         internal async Task UpdatePerson_WithNullId_ReturnBadRequest()
         {
             // Arrange
-            long? id = testPerson.Id;
+            long? id = null;
 
-            var body = JsonConvert.SerializeObject(testPerson);
-            var request = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/person/{id}");
-            request.Content = new StringContent(body, Encoding.UTF8, "application/json");
+            Person person =
+                    new Person
+                    {
+                        Id = 1,
+                        Name = "TestName",
+                        SkillsCollection =
+                        new Skill[]
+                        {
+                            new Skill
+                            {
+                                Name="TestSkill",
+                                Level = 1
+                            }
+                        }
+                    };
+
+            var body = JsonConvert.SerializeObject(person);
+            var request = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/person/{id}")
+            {
+                Content = new StringContent(body, Encoding.UTF8, "application/json")
+            };
+
             // Act
             var response = await _client.SendAsync(request);
 
@@ -235,30 +226,29 @@ namespace HallOfFame.IntegrationTest
         {
             // Arrange
             long id = 1;
+
             Person person =
-            new Person
+                    new Person
+                    {
+                        Id=12,
+                        Name = "TestName",
+                        SkillsCollection =
+                        new Skill[]
+                        {
+                            new Skill
+                            {
+                                Name="TestSkill",
+                                Level = 1
+                            }
+                        }
+                    };
+
+            var body = JsonConvert.SerializeObject(person);
+            var request = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/person/{id}")
             {
-                Id = 12,
-                Name = "TestsName",
-                SkillsCollection =
-                new Skill[]
-                {
-                    new Skill
-                    {
-                        Name="TestSkill",
-                        Level = 9
-                    },
-                    new Skill
-                    {
-                        Name="TestSkill2",
-                        Level = 9
-                    }
-                }
+                Content = new StringContent(body, Encoding.UTF8, "application/json")
             };
 
-            var body = JsonConvert.SerializeObject(testPerson);
-            var request = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/person/{id}");
-            request.Content = new StringContent(body, Encoding.UTF8, "application/json");
             // Act
             var response = await _client.SendAsync(request);
 
@@ -273,29 +263,26 @@ namespace HallOfFame.IntegrationTest
             long id = 1;
 
             Person person =
-                        new Person
+                    new Person
+                    {
+                        Id = 1,
+                        Name = "TestName",
+                        SkillsCollection =
+                        new Skill[]
                         {
-                            Id = id,
-                            Name = "TestsName",
-                            SkillsCollection =
-                            new Skill[]
+                            new Skill
                             {
-                    new Skill
-                    {
-                        Name="TestSkill",
-                        Level = 11
-                    },
-                    new Skill
-                    {
-                        Name="TestSkill2",
-                        Level = 9
-                    }
+                                Name="TestSkill",
+                                Level = 11
                             }
-                        };
+                        }
+                    };
 
-            var body = JsonConvert.SerializeObject(testPerson);
-            var request = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/person/{id}");
-            request.Content = new StringContent(body, Encoding.UTF8, "application/json");
+            var body = JsonConvert.SerializeObject(person);
+            var request = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/person/{id}")
+            {
+                Content = new StringContent(body, Encoding.UTF8, "application/json")
+            };
             // Act
             var response = await _client.SendAsync(request);
 
@@ -331,8 +318,10 @@ namespace HallOfFame.IntegrationTest
             };
 
             var body = JsonConvert.SerializeObject(person);
-            var request = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/person/{id}");
-            request.Content = new StringContent(body, Encoding.UTF8, "application/json");
+            var request = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/person/{id}")
+            {
+                Content = new StringContent(body, Encoding.UTF8, "application/json")
+            };
             // Act
             var response = await _client.SendAsync(request);
 
@@ -398,7 +387,7 @@ namespace HallOfFame.IntegrationTest
         internal async Task DeletePerson_WithBadId_ReturnsNotFound()
         {
             // Arrange
-            long id = 0;
+            long id = 9999;
             var request = new HttpRequestMessage(HttpMethod.Delete, $"/api/v1/person/{id}");
 
             // Act
