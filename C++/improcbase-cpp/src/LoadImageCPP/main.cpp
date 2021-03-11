@@ -18,16 +18,6 @@ void BrightAdjuster(char *inputfilename, char *outputfilename, float brightAdjus
 	ImageIO::ImageToFile(image, outputfilename);
 }
 
-int main_func(int argc, char* argv[])
-{
-	if (argc < 4)
-		return 0;
-
-	BrightAdjuster(argv[1], argv[2], atof(argv[3]));
-
-	return 0;
-}
-
 int main(int argc, char* argv[])
 {
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
@@ -40,7 +30,15 @@ int main(int argc, char* argv[])
 
 	try
 	{
-		exit_code = main_func(argc, argv);
+		//Функция изменения яркости изображения
+		//argv[1] - путь по которому находится исходное изображение char*
+		//argv[2] - путь по которому необходимо сохранить измененное изображение char*
+		//argv[3] - абсолютное значение яркости float
+
+		if (argc == 4)
+			BrightAdjuster(argv[1], argv[2], atof(argv[3]));
+
+		exit_code = 0;
 	}
 	catch (...)
 	{
@@ -52,7 +50,10 @@ int main(int argc, char* argv[])
 
 	return exit_code;
 #else
-	return main_func(argc, argv);
+	if (argc == 4)
+		BrightAdjuster(argv[1], argv[2], atof(argv[3]));
+
+	return 0;
 #endif
 }
 
