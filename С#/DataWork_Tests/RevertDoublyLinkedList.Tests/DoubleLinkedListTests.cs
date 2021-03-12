@@ -9,22 +9,20 @@ namespace RevertDoublyLinkedList.Tests
         [Fact]
         public void AddLast()
         {
-            DoubleLinkedList<string> linkedList = new DoubleLinkedList<string>();
+            DoubleLinkedList<int> linkedList = new DoubleLinkedList<int>();
 
-            List<string> testList = new List<string>{"Bob", "Bill"};
-
-            linkedList.AddLast(testList[0]);
+            linkedList.AddLast(1);
             Assert.Equal(1, linkedList.Count);
-            Assert.True(linkedList.Contains(testList[0]));
+            Assert.True(linkedList.Contains(1));
 
-            linkedList.AddLast(testList[1]);
+            linkedList.AddLast(2);
             Assert.Equal(2, linkedList.Count);
 
-            int i = 0;
+            int i = 1;
 
             foreach (var item in linkedList)
             { 
-                Assert.Equal(testList[i], item);
+                Assert.Equal(i, item);
                 i++; 
             }
         }
@@ -32,22 +30,20 @@ namespace RevertDoublyLinkedList.Tests
         [Fact]
         public void AddFirst()
         {
-            DoubleLinkedList<string> linkedList = new DoubleLinkedList<string>();
+            DoubleLinkedList<int> linkedList = new DoubleLinkedList<int>();
 
-            List<string> testList = new List<string> { "Bob", "Bill" };
-
-            linkedList.AddFirst(testList[0]);
+            linkedList.AddFirst(1);
             Assert.Equal(1, linkedList.Count);
-            Assert.True(linkedList.Contains(testList[0]));
+            Assert.True(linkedList.Contains(1));
 
-            linkedList.AddFirst(testList[1]);
+            linkedList.AddFirst(2);
             Assert.Equal(2, linkedList.Count);
 
-            int i = 1;
+            int i = 2;
 
             foreach (var item in linkedList)
             {
-                Assert.Equal(testList[i], item);
+                Assert.Equal(i, item);
                 i--;
             }
         }
@@ -55,45 +51,63 @@ namespace RevertDoublyLinkedList.Tests
         [Fact]
         public void Remove_WithItemInList_ReturnsTrue()
         {
-            DoubleLinkedList<string> linkedList = new DoubleLinkedList<string>();
+            DoubleLinkedList<int> linkedList = new DoubleLinkedList<int>();
 
-            List<string> testList = new List<string> { "Bob", "Bill" };
+            linkedList.AddFirst(1);
 
-            linkedList.AddFirst(testList[0]);
-
-            Assert.True(linkedList.Remove(testList[0]));
+            Assert.True(linkedList.Remove(1));
         }
 
         [Fact]
         public void Remove_WithEmptyList_ReturnsFalse()
         {
-            DoubleLinkedList<string> linkedList = new DoubleLinkedList<string>();
+            DoubleLinkedList<int> linkedList = new DoubleLinkedList<int>();
 
-            List<string> testList = new List<string> { "Bob", "Bill" };
-
-            Assert.False(linkedList.Remove(testList[0]));
+            Assert.False(linkedList.Remove(1));
         }
 
         [Fact]
-        public void Rverse()
+        public void Reverse_WithNonEmptyList()
         {
-            DoubleLinkedList<string> linkedList = new DoubleLinkedList<string>();
+            DoubleLinkedList<int> linkedList = new DoubleLinkedList<int>();
 
-            List<string> testList = new List<string> { "Bob", "Bill" };
-
-            linkedList.AddLast(testList[0]);
-            linkedList.AddLast(testList[1]);
-            Assert.Equal(2, linkedList.Count);
+            int j = 0;
+            for (; j <= 10; j++)
+                linkedList.AddLast(j);
 
             linkedList.Reverse();
 
-            int i = 1;
-
+            j = 10;
             foreach (var item in linkedList)
             {
-                Assert.Equal(testList[i], item);
-                i--;
+                Assert.Equal(j, item);
+                j--;
             }
+        }
+
+        [Fact]
+        public void Reverse_WithEmptyList()
+        {
+            DoubleLinkedList<int> linkedList = new DoubleLinkedList<int>();
+
+            linkedList.Reverse();
+
+            Assert.Equal(0, linkedList.Count);
+        }
+
+        [Fact]
+        public void Reverse_WithSinlgeElementInList()
+        {
+            DoubleLinkedList<int> linkedList = new DoubleLinkedList<int>();
+
+            linkedList.AddFirst(1);
+
+            linkedList.Reverse();
+
+            Assert.Equal(1, linkedList.Count);
+
+            foreach (var item in linkedList)
+                Assert.Equal(1, item);
         }
     }
 }

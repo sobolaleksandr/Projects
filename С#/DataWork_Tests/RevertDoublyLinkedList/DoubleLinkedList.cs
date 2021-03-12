@@ -9,7 +9,7 @@ namespace RevertDoublyLinkedList
         DoubleLinkedListNode<T> Last; // последний/хвостовой элемент
         int count;  // количество элементов в списке
 
-        // добавление элемента
+        //insert new DoubleLinkedListNode with given value at the end of the list
         public void AddLast(T value)
         {
             DoubleLinkedListNode<T> node = new DoubleLinkedListNode<T>(value);
@@ -25,7 +25,8 @@ namespace RevertDoublyLinkedList
             count++;
         }
 
-        public void AddFirst(T value)//insert new DoubleLinkedListNode with given value at the end of the list
+        //insert new DoubleLinkedListNode with give value at the start of the list
+        public void AddFirst(T value)
         {
             DoubleLinkedListNode<T> node = new DoubleLinkedListNode<T>(value);
             DoubleLinkedListNode<T> temp = First;
@@ -53,22 +54,23 @@ namespace RevertDoublyLinkedList
             return false;
         }
 
-        public void Reverse()//insert new DoubleLinkedListNode with give value at the start of the list
+        public void Reverse()
         {
-            if (count < 2)
-                return;
+            DoubleLinkedListNode<T> temp = null;
+            DoubleLinkedListNode<T> current = First;
 
-            DoubleLinkedListNode<T> temp;
-
-            DoubleLinkedListNode<T> node = First;
-            do
+            while (current != null)
             {
-                temp = node.Next;
-                node.Next = node.Prev;
-                node.Prev = temp;
-                node = temp;
+                temp = current.Prev;
+                current.Prev = current.Next;
+                current.Next = temp;
+                current = current.Prev;
             }
-            while (temp != Last);
+
+            if (temp != null)
+            {
+                First = temp.Prev;
+            }
 
         }
 
@@ -128,16 +130,6 @@ namespace RevertDoublyLinkedList
             {
                 yield return current.Value;
                 current = current.Next;
-            }
-        }
-
-        public IEnumerable<T> BackEnumerator()
-        {
-            DoubleLinkedListNode<T> current = Last;
-            while (current != null)
-            {
-                yield return current.Value;
-                current = current.Prev;
             }
         }
     }
