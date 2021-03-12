@@ -1,0 +1,39 @@
+Составить запрос, который выводит список брендов (brand.name), с указанием количества единиц продукта в порядке убывания их количества на каждом складе для текущего бренда.
+Необходимо учитывать, что по некотором брендам на скалад могут отсутсвовать товары на единицу времени, при этом в вывод такие бренды также должны попадать.
+Под отсуствием понимать отсутсвие записи продукта в таблице товаров goods, а не нулевое количество
+
+SELECT brand.name, goods.quantity
+FROM brand LEFT OUTER JOIN product 
+  ON brand.id = product.brandId
+LEFT JOIN goods
+  ON product.id = goods.productId
+ORDER BY goods.quantity DESC
+
+
+а)
+SELECT
+  warehouse.name,
+  SUM(goods.quantity) AS quantity
+FROM brand,
+     warehouse
+       INNER JOIN goods
+         ON warehouse.ID = goods.warehouse_Id
+WHERE brand.country = 'DE'
+GROUP BY warehouse.name
+
+б)
+
+
+в)
+SELECT
+  warehouse.name,
+  COUNT(*) AS Product,
+  SUM(goods.quantity) AS units
+FROM product
+  INNER JOIN goods
+    ON product.id = goods.producId
+  INNER JOIN warehouse
+    ON warehouse.ID = goods.worehouseId
+GROUP BY warehouse.name
+HAVING SUM(goods.quantity) > 100
+ORDER BY units DESC

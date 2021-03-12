@@ -4,14 +4,4 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="DoubleLinkedListNode_init.cs" />
-    <Compile Remove="DoubleLinkedList_Init.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="DoubleLinkedList_Init.cs" />
-    <None Include="DoubleLinkedListNode_init.cs" />
-  </ItemGroup>
-
 </Project>
