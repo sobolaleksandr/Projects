@@ -1,18 +1,10 @@
-using HallOfFame.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using HallOfFame.Data;
 
 namespace HallOfFame.Web
 {
@@ -30,7 +22,6 @@ namespace HallOfFame.Web
         {
             services.AddControllers();
             services.AddSwaggerGen();
-            string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<HallOfFameDbContext>(options => options.UseSqlServer(
                 "Server=(localdb)\\mssqllocaldb;Database=halloffamedb;Trusted_Connection=True;MultipleActiveResultSets=true"));
             services.AddScoped<IPeopleRepository, PeopleRepository>();

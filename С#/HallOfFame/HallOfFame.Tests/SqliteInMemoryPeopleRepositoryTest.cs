@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Data.Common;
-using HallOfFame.Data;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using HallOfFame.Data;
 
 namespace HallOfFame.Tests
 {

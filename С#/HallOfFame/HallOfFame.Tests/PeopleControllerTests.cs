@@ -1,18 +1,16 @@
-using HallOfFame.Web.Controllers;
-using Microsoft.AspNetCore.Mvc;
-using Moq;
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using HallOfFame.Web.Controllers;
+using Moq;
 using Xunit;
 
 namespace HallOfFame.Tests
 {
     public class PeopleControllerTests
     {
-        private IEnumerable<Person> GetPeople()=>
+        private static IEnumerable<Person> GetPeople()=>
             new Person[]
             {
                 new Person {
@@ -51,8 +49,7 @@ namespace HallOfFame.Tests
             }
             };
 
-
-        Person person =
+        readonly Person person =
         new Person
         {
             Id = 1,
@@ -87,7 +84,7 @@ namespace HallOfFame.Tests
 
             // Assert
             var viewResult = Assert.IsAssignableFrom<Person[]>(result);
-            Assert.Equal(2, viewResult.Count());
+            Assert.Equal(2, viewResult.Length);
         }
 
         [Fact]

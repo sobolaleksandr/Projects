@@ -1,12 +1,7 @@
-﻿using HallOfFame.Data;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using HallOfFame.Data;
 using Xunit;
 
 namespace HallOfFame.Tests

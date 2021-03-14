@@ -1,48 +1,21 @@
-﻿using Xunit;
-using HallOfFame.Web.Controllers;
-using Microsoft.AspNetCore.TestHost;
-using Microsoft.AspNetCore.Hosting;
-using System.Net.Http;
-using HallOfFame.Web;
+﻿using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Text;
+using System.Net.Http;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.AspNetCore.Hosting;
+using HallOfFame.Web;
+using Xunit;
 using Newtonsoft.Json;
-using System.Linq;
-using HallOfFame.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace HallOfFame.IntegrationTest
 {
     public class PeopleTest
     {
         private readonly HttpClient _client;
-        private PersonJson testPerson = new PersonJson();
-
-        public class PersonJson
-        {
-            [JsonProperty(PropertyName = "Id")]
-            public long Id { get; set; }
-            [JsonProperty(PropertyName = "Name")]
-            public string Name { get; set; }
-            [JsonProperty(PropertyName = "DisplayName")]
-            public string DisplayName { get; set; }
-            [JsonProperty(PropertyName = "SkillsCollection")]
-            public List<SkillJson> SkillsCollection { get; set; }
-        }
-
-        public class SkillJson
-        {
-            [JsonProperty(PropertyName = "Id")]
-            public long Id { get; set; }
-            [JsonProperty(PropertyName = "Name")]
-            public string Name { get; set; }
-            [JsonProperty(PropertyName = "Level")]
-            public byte Level { get; set; }
-            [JsonProperty(PropertyName = "PersonId")]
-            public long PersonId { get; set; }
-        }
+        private Person testPerson;
 
         public PeopleTest()
         {
@@ -158,7 +131,7 @@ namespace HallOfFame.IntegrationTest
             // Act
             var response = await _client.SendAsync(request);
             var content = await response.Content.ReadAsStringAsync();
-            List<PersonJson> jsonPersons = JsonConvert.DeserializeObject<List<PersonJson>>(content);
+            List<Person> jsonPersons = JsonConvert.DeserializeObject<List<Person>>(content);
             testPerson = jsonPersons.Where(p => p.Name == "TestsName").FirstOrDefault();
 
             // Assert
@@ -169,8 +142,9 @@ namespace HallOfFame.IntegrationTest
         internal async Task UpdatePerson_WithGoodModel_ReturnsOk()
         {
             // Arrange
-            testPerson.SkillsCollection[0].Level = 1;
-            testPerson.SkillsCollection[1].Level = 1;
+            var skillsArray = testPerson.SkillsCollection.ToArray();
+            skillsArray[0].Level = 1;
+            skillsArray[1].Level = 1;
             long id = testPerson.Id;
 
             var body = JsonConvert.SerializeObject(testPerson);
@@ -294,7 +268,7 @@ namespace HallOfFame.IntegrationTest
         internal async Task UpdatePerson_WithNonExistingPerson_ReturnsNotFound()
         {
             // Arrange
-            long id = 12;
+            long id = long.MaxValue;
 
             Person person =
             new Person
@@ -338,7 +312,7 @@ namespace HallOfFame.IntegrationTest
             // Act
             var response = await _client.SendAsync(request);
             var content = await response.Content.ReadAsStringAsync();
-            PersonJson jsonPerson = JsonConvert.DeserializeObject<PersonJson>(content);
+            Person jsonPerson = JsonConvert.DeserializeObject<Person>(content);
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -346,24 +320,25 @@ namespace HallOfFame.IntegrationTest
 
             Assert.Equal("TestsName", jsonPerson.Name);
             Assert.Null(jsonPerson.DisplayName);
-            Assert.Equal(2, jsonPerson.SkillsCollection.Count);
-            Assert.Equal("TestSkill", jsonPerson.SkillsCollection[0].Name);
-            Assert.Equal(1, jsonPerson.SkillsCollection[0].Level);
-            Assert.Equal("TestSkill2", jsonPerson.SkillsCollection[1].Name);
-            Assert.Equal(1, jsonPerson.SkillsCollection[1].Level);
+
+            var skillsArray = jsonPerson.SkillsCollection.ToArray();
+
+            Assert.Equal(2, skillsArray.Length);
+            Assert.Equal("TestSkill", skillsArray[0].Name);
+            Assert.Equal(1, skillsArray[0].Level);
+            Assert.Equal("TestSkill2", skillsArray[1].Name);
+            Assert.Equal(1, skillsArray[1].Level);
         }
 
         [Fact]
         internal async Task GetPerson_ReturnsNotFound()
         {
             // Arrange
-            long id = 9999;
+            long id = long.MaxValue;
             var request = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/person/{id}");
 
             // Act
             var response = await _client.SendAsync(request);
-            var content = await response.Content.ReadAsStringAsync();
-            PersonJson jsonPerson = JsonConvert.DeserializeObject<PersonJson>(content);
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -387,7 +362,7 @@ namespace HallOfFame.IntegrationTest
         internal async Task DeletePerson_WithBadId_ReturnsNotFound()
         {
             // Arrange
-            long id = 9999;
+            long id = long.MaxValue;
             var request = new HttpRequestMessage(HttpMethod.Delete, $"/api/v1/person/{id}");
 
             // Act
