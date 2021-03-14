@@ -2,7 +2,7 @@
 import requests
 import json
 
-API_KEY = "94ce46706530804502bd666a44a1d7d7"#Мой API-ключ
+API_KEY = "Your API-Key"#Мой API-ключ
 
 longitude = 37.6156  # долгота
 latitude  = 55.7522  # широта
