@@ -5,11 +5,13 @@ VisualStudioVersion = 16.0.31019.35
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "application", "application", "{491A2254-00BE-4846-B2AF-FC0852FF24E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleContacts.App", "GoogleContacts.App\GoogleContacts.App.csproj", "{EE5A79F3-7EF2-4BFA-BAA3-9E13A6243412}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoogleContacts.App", "GoogleContacts.App\GoogleContacts.App.csproj", "{EE5A79F3-7EF2-4BFA-BAA3-9E13A6243412}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "domain", "domain", "{64889C34-D4C9-405F-9E69-4C2FBB36F372}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleContacts.Domain", "GoogleContacts.Domain\GoogleContacts.Domain.csproj", "{A68E764A-105F-467C-8B79-0593E9A160D6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoogleContacts.Domain", "GoogleContacts.Domain\GoogleContacts.Domain.csproj", "{A68E764A-105F-467C-8B79-0593E9A160D6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleContacts.Domain.Tests", "GoogleContacts.Domain.Tests\GoogleContacts.Domain.Tests.csproj", "{7FA59C08-4110-48AF-9D21-F9BA4CCBD301}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,6 +27,10 @@ Global
 		{A68E764A-105F-467C-8B79-0593E9A160D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A68E764A-105F-467C-8B79-0593E9A160D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A68E764A-105F-467C-8B79-0593E9A160D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FA59C08-4110-48AF-9D21-F9BA4CCBD301}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FA59C08-4110-48AF-9D21-F9BA4CCBD301}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FA59C08-4110-48AF-9D21-F9BA4CCBD301}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FA59C08-4110-48AF-9D21-F9BA4CCBD301}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -32,6 +38,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{EE5A79F3-7EF2-4BFA-BAA3-9E13A6243412} = {491A2254-00BE-4846-B2AF-FC0852FF24E8}
 		{A68E764A-105F-467C-8B79-0593E9A160D6} = {64889C34-D4C9-405F-9E69-4C2FBB36F372}
+		{7FA59C08-4110-48AF-9D21-F9BA4CCBD301} = {64889C34-D4C9-405F-9E69-4C2FBB36F372}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2F46F30E-742D-48DF-A566-BD9DDEEEF9BC}
