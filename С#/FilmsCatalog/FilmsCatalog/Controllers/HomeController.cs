@@ -1,4 +1,5 @@
 ﻿using FilmsCatalog.Data;
+using FilmsCatalog.Services;
 using FilmsCatalog.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -19,16 +20,17 @@ namespace FilmsCatalog.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly SignInManager<User> _signInManager;
-        private readonly IWebHostEnvironment _appEnvironment;
+        private readonly IImageSaver _imageSaver;
 
         public HomeController(
             SignInManager<User> signInManager,
             ApplicationDbContext context,
-            IWebHostEnvironment appEnvironment)
+            IImageSaver imageSaver
+            )
         {
             _context = context;
             _signInManager = signInManager;
-            _appEnvironment = appEnvironment;
+            _imageSaver = imageSaver;
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -79,10 +81,7 @@ namespace FilmsCatalog.Controllers
                     Added = User.Identity.Name
                 };
 
-                movie.Poster = await SaveFileReturnName(mvm.Poster);
-
-                //if (mvm.Poster != null)
-                //        movie.Poster = FormatImage(mvm.Poster);
+                movie.Poster = await _imageSaver.SaveFile(mvm.Poster);
 
                 if (mvm.ID == 0)
                 {
@@ -99,53 +98,7 @@ namespace FilmsCatalog.Controllers
 
             return RedirectToAction(nameof(BadLogin));
         }
-        //Сохранение в файловой системе для string Poster
-        private async Task<string> SaveFileReturnName(IFormFile uploadedFile)
-        {
-            if (uploadedFile != null)
-            {
-                if (IsImage(uploadedFile, 1500000, resolutions))
-                {
-                    // путь к папке Files
-                    string path = "/Files/" + uploadedFile.FileName;
-                    // сохраняем файл в папку Files в каталоге wwwroot
-                    using (var fileStream = new FileStream(_appEnvironment.WebRootPath + path, FileMode.Create))
-                    {
-                        await uploadedFile.CopyToAsync(fileStream);
-                    }
-
-                    return path;
-                }
-            }
-            return null;
-        }
-
-        List<string> resolutions = new List<string>
-        {
-            "image/jpeg","image/bmp","image/jpg","image/gif","image/png","image/png"
-        };
-
-        private bool IsImage(IFormFile uploadedFile, long sizeBytes, List<string> resoulutions)
-        {
-            if (resolutions.Contains(uploadedFile.ContentType) &&                
-                uploadedFile.Length < sizeBytes)
-                return true;
-            else
-                return false;
-        }
-
-        //Выгрузка в БД для byte[] Poster
-        private byte[] FormatImage(IFormFile poster)
-        {
-            byte[] imageData = null;
-            // считываем переданный файл в массив байтов
-            using (var binaryReader = new BinaryReader(poster.OpenReadStream()))
-            {
-                imageData = binaryReader.ReadBytes((int)poster.Length);
-            }
-            // установка массива байтов
-            return imageData;
-        }
+        
 
         public async Task<IActionResult> Index(int page = 1)
         {

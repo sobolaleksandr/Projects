@@ -1,5 +1,6 @@
 using FilmsCatalog.Data;
 using FilmsCatalog.Models;
+using FilmsCatalog.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -36,6 +37,7 @@ namespace FilmsCatalog
             services.AddDatabaseDeveloperPageExceptionFilter();            
             services.AddControllersWithViews();
             services.AddRazorPages();
+            services.AddSingleton<IImageSaver, ImageSaver>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
