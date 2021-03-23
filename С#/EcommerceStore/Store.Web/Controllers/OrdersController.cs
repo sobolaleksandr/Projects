@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Store.Views;
 using Store.Web.App;
 
 namespace Store.Web.Controllers
@@ -23,7 +22,7 @@ namespace Store.Web.Controllers
 
         //Список клиентов, заказавших товара на сумму, превышающую указанную
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<string>>> GetCustomers(decimal sum)
+        public async Task<ActionResult<Customer[]>> GetCustomers(decimal sum)
         {
             if (sum >= 0)
             {
@@ -35,21 +34,21 @@ namespace Store.Web.Controllers
 
         //Список заказов для указанного клиента, с указанием общей стоимости каждого
         [HttpGet("{id}")]
-        public async Task<ActionResult<IEnumerable<CustomerOrder>>> GetCustomer(string id)
+        public async Task<ActionResult<IEnumerable<Order>>> GetCustomer(string id)
         {
             if (id == default)
             {
                 return BadRequest();
             }
 
-            var customerOrder = await orderService.GetById(id);
+            var customer = orderService.GetCustomerById(id);
 
-            if (customerOrder.Count() == 0)
-            {
-                return NotFound();
-            }
+            //if (customer.Count() == 0)
+            //{
+            //    return NotFound();
+            //}
 
-            return new ObjectResult(customerOrder);
+            return new ObjectResult(customer);
         }
 
         //Оставил реализацию по-умолчанию
@@ -72,19 +71,18 @@ namespace Store.Web.Controllers
         //Создаем заказ, вместе с ним создаем клиента.
         //Если клиента существует, создаем для него заказ
         [HttpPost]
-        public async Task<ActionResult<Order>> CreateOrder(Order order)
+        public async Task<ActionResult<OrderModel>> CreateOrder(OrderModel order)
         {
-            if (!await orderService.TryToCreate(order))
-            {
-                return BadRequest();
-            }           
+            if (ModelState.IsValid)
+                if (await orderService.TryToCreate(order))
+                    return Ok();
 
-            return Ok();
+            return BadRequest();
         }
 
         //Оставил реализацию по-умолчанию
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Order>> DeleteOrder(int id)
+        public async Task<ActionResult<OrderModel>> DeleteOrder(int id)
         {
             var order = await orderService.Delete(id);
 

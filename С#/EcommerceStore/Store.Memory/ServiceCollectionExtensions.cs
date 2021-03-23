@@ -20,10 +20,6 @@ namespace Store.Memory
             services.AddScoped<Dictionary<Type, EcommerceContext>>();
             services.AddSingleton<DbContextFactory>();
             services.AddSingleton<IOrderRepository, OrderRepository>();
-            services.AddSingleton<ICustomerOrderRepository, CustomerOrderRepository>();
-            services.AddSingleton<ICustomerInvestmentRepository, CustomerInvestmentRepository>();
-            services.AddSingleton<ILineItemsRepository, LineItemsRepository>();
-            services.AddSingleton<IProductListRepository, ProductListRepository>();
             services.AddSingleton<IProductRepository, ProductRepository>();
 
             return services;

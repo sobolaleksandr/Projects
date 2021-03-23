@@ -12,8 +12,4 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Store.Views\Store.Views.csproj" />
-  </ItemGroup>
-
 </Project>

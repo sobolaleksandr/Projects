@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Store.Memory;
-using Store.Views;
 using Store.Web.App;
 
 namespace Store.Web.Controllers
@@ -24,43 +23,35 @@ namespace Store.Web.Controllers
         //Возращаем список продуктов, отсортированных по популярности
         //для кажого продукта указываем общее количество проданных единиц
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductList>>> GetProducts()
+        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
         {
             return new ObjectResult(await productService.GetAll());
         }
 
         //Оставил реализацию по-умолчанию
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProduct(string id)
+        public async Task<ActionResult<Product>> GetProduct(int id)
         {
             if (id == default)
-            {
-                BadRequest();
-            }
+                return BadRequest();
 
             var product = await productService.GetById(id);
 
             if (product == null)
-            {
                 return NotFound();
-            }
 
             return new ObjectResult(product);
         }
 
         //Оставил реализацию по-умолчанию
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProduct(string id, Product product)
+        public async Task<IActionResult> UpdateProduct(int id, Product product)
         {
-            if (id != product.Name || id == default(string))
-            {
+            if (id != product.Id || id == default)
                 return BadRequest();
-            }
 
             if (await productService.Update(id, product))
-            {
                 return NoContent();
-            }
 
             return NotFound();
         }
@@ -85,19 +76,15 @@ namespace Store.Web.Controllers
 
         //Оставил реализацию по-умолчанию
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Product>> DeleteProduct(string id)
+        public async Task<ActionResult<Product>> DeleteProduct(int id)
         {
-            if (id == default(string))
-            {
+            if (id == default)
                 return BadRequest();
-            }
 
             var product = await productService.Delete(id);
 
             if (product == null)
-            {
                 return NotFound();
-            }
 
             return new ObjectResult(product);
         }

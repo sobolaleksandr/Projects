@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Store.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,11 +8,16 @@ namespace Store
 {
     public interface IOrderRepository
     {
-        Task<IEnumerable<string>> GetAllBySum(decimal sum);
         Task<bool> Update(int id, Order order);
-        Task Create(Order order);
+
+        Task<bool> TryToCreate(OrderModel order);
+
         Task<Order> Delete(int id);
-        Task<bool> IsValidOrder(Order order);
-        Task<decimal> GetSum(LineBuffer item);
+
+        Task<Customer[]> GetAllBySum(decimal sum);
+
+        Task<Order> GetByNumber(int number);
+
+        Task<object> GetCustomerById(string id);
     }
 }

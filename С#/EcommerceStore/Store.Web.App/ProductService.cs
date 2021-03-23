@@ -1,5 +1,4 @@
-﻿using Store.Views;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,26 +8,25 @@ namespace Store.Web.App
     public class ProductService
     {
         private readonly IProductRepository productRepository;
-        private readonly IProductListRepository productListRepository;
 
-        public ProductService(IProductRepository productRepository,
-                              IProductListRepository productListRepository)
+        public ProductService(
+            IProductRepository productRepository
+            )
         {
             this.productRepository = productRepository;
-            this.productListRepository = productListRepository;
         }
 
-        public async Task<IEnumerable<ProductList>> GetAll()
+        public async Task<IEnumerable<Product>> GetAll()
         {
-            return await productListRepository.GetAll();
+            return await productRepository.GetAllSortedByPopularity();
         }
 
-        public async Task<Product> GetById(string id)
+        public async Task<Product> GetById(int id)
         {
             return await productRepository.GetById(id);
         }
 
-        public async Task<bool> Update(string id, Product product)
+        public async Task<bool> Update(int id, Product product)
         {
             return await productRepository.Update(id, product);
         }
@@ -38,7 +36,7 @@ namespace Store.Web.App
             return await productRepository.TryToCreate(product);
         }
 
-        public async Task<Product> Delete(string id)
+        public async Task<Product> Delete(int id)
         {
             return await productRepository.Delete(id);
         }
