@@ -26,7 +26,7 @@ namespace Store.Web.Controllers
             GetCustomersBySum(decimal sum)
         {
             if (sum >= 0)
-                return new ObjectResult(await orderService.GetAllBySum(sum));
+                return new ObjectResult(await orderService.GetCustomerBySum(sum));
 
             return BadRequest();
         }
@@ -34,7 +34,7 @@ namespace Store.Web.Controllers
         //Список заказов для указанного клиента, с указанием общей стоимости каждого
         [HttpGet("{id}")]
         public async Task<ActionResult<IEnumerable<CustomerOrders>>> 
-            GetCustomerOrders(string id)
+            GetCustomerOrdersById(string id)
         {
             if (id == default)
                 return BadRequest();
@@ -47,7 +47,7 @@ namespace Store.Web.Controllers
         public async Task<IActionResult> UpdateOrder(int id, Order order)
         {
             if (id != order.Id)
-                return BadRequest("");
+                return BadRequest();
 
             if (await orderService.Update(id, order))
                 return NoContent();

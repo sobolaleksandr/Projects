@@ -25,7 +25,7 @@ namespace FilmsCatalog.Models
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            List<ValidationResult> errors = new List<ValidationResult>();
+            List<ValidationResult> errors = new();
 
             if (string.IsNullOrWhiteSpace(this.Title))
             {
