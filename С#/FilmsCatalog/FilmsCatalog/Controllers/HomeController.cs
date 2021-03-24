@@ -33,6 +33,7 @@ namespace FilmsCatalog.Controllers
             _imageSaver = imageSaver;
         }
 
+        [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
             if (id != null)
@@ -41,9 +42,11 @@ namespace FilmsCatalog.Controllers
                 if (movie != null)
                     return View(movie);
             }
+
             return NotFound();
         }
 
+        [HttpGet]
         public async Task<IActionResult> CreateOrEdit(int? id)
         {
             if (_signInManager.IsSignedIn(User))
@@ -67,30 +70,32 @@ namespace FilmsCatalog.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateOrEdit(MovieViewModel mvm)
         {
+            
+            Movie movie = new Movie
+            {
+                ID = mvm.ID,
+                Title = mvm.Title,
+                Description = mvm.Description,
+                Year = mvm.Year,
+                Producer = mvm.Producer,
+                Added = User.Identity.Name
+            };
+
+            if (!ModelState.IsValid)
+                return View(movie);
+
+
             if (_signInManager.IsSignedIn(User))
             {
-                Movie movie = new Movie
-                {
-                    ID = mvm.ID,
-                    Title = mvm.Title,
-                    Description = mvm.Description,
-                    Year = mvm.Year,
-                    Producer = mvm.Producer,
-                    Added = User.Identity.Name
-                };
-
                 movie.Poster = await _imageSaver.SaveFile(mvm.Poster);
 
                 if (mvm.ID == 0)
-                {
                     _context.Movies.Add(movie);
-                }
                 else
-                {
                     _context.Movies.Update(movie);
-                }
 
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Index");
@@ -98,8 +103,8 @@ namespace FilmsCatalog.Controllers
 
             return RedirectToAction(nameof(BadLogin));
         }
-        
 
+        [HttpGet]
         public async Task<IActionResult> Index(int page = 1)
         {
             int pageSize = 10;
