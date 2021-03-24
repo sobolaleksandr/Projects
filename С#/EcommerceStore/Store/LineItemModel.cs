@@ -7,8 +7,6 @@ namespace Store
 {
     public class LineItemModel
     {
-        public int Id { get; set; }
-
         [Required]
         //Количество продуктов в одной позиции - положительное число
         [Range(1, 999999999999, ErrorMessage =

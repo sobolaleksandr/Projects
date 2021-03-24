@@ -16,9 +16,9 @@ namespace Store.Web.App
             this.productRepository = productRepository;
         }
 
-        public async Task<IEnumerable<Product>> GetAll()
+        public async Task<IEnumerable<ProductView>> GetAllByPopularity()
         {
-            return await productRepository.GetAllSortedByPopularity();
+            return await productRepository.GetAllByPopularity();
         }
 
         public async Task<Product> GetById(int id)

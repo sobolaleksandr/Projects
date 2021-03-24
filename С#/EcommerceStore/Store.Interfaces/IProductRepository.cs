@@ -9,15 +9,13 @@ namespace Store
     {
         Task<Product> GetById(int id);
 
-        Task<IEnumerable<Product>> GetAllSortedByPopularity();
+        Task<IEnumerable<ProductView>> GetAllByPopularity();
 
         Task<bool> TryToCreate(Product product);
 
         Task<bool> Update(int id, Product product);
 
         Task<Product> Delete(int id);
-
-        Task<Product> GetByName(string name);
 
         Task<List<Product>> GetAll();
     }

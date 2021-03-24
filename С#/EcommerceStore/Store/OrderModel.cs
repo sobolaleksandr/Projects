@@ -7,8 +7,6 @@ namespace Store
 {
     public class OrderModel
     {
-        public int Id { get; set; }
-
         [DataType(DataType.Date)]
         public DateTime Created { get; set; }
 

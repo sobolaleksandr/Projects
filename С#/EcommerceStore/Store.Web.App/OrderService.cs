@@ -21,9 +21,9 @@ namespace Store.Web.App
             this.productRepository = productRepository;
         }
 
-        public async Task<Customer[]> GetAllBySum(decimal sum)
+        public async Task<IEnumerable<CustomerInvestmentsView>> GetAllBySum(decimal sum)
         {
-            return await orderRepository.GetAllBySum(sum);
+            return await orderRepository.GetCustomersBySum(sum);
         }
 
         public async Task<bool> Update(int id, Order order)
@@ -56,11 +56,6 @@ namespace Store.Web.App
             return false;
         }
 
-        public object GetCustomerById(string id)
-        {
-            return orderRepository.GetCustomerById(id);
-        }
-
         public async Task<bool> ValidateItems(OrderModel order)
         {
             if (order.Items.ToList().Count == 0)
@@ -81,6 +76,10 @@ namespace Store.Web.App
             return true;
         }
 
+        public async Task<IEnumerable<CustomerOrders>> GetCustomerOrdersById(string id)
+        {
+            return await orderRepository.GetCustomerOrdersById(id);
+        }
     }
 
 }

@@ -57,42 +57,20 @@ namespace Store.Memory
             return true;
         }
 
-        public async Task<Customer[]> GetAllBySum(decimal sum)
+        public async Task<IEnumerable<CustomerInvestmentsView>> GetCustomersBySum(decimal sum)
         {
             var _context = dbContextFactory.Create(typeof(OrderRepository));
 
-            return await _context.Customers.FromSqlRaw(
-" Select " +
-" Customers.Email from Customers left outer join Orders on " +
-" Orders.CustomerEmail = Customers.Email " +
-" left outer join LineItems on LineItems.OrderNumber = Orders.Number left outer join " +
-" Products on Products.Id = LineItems.ProductId " +
-" where Products.Price * LineItems.Quantity > {0} ", sum).ToArrayAsync();
-        }
+            var join = from customer in _context.Customers
+                       join order in _context.Orders on customer.Email equals order.CustomerEmail
+                       join item in _context.LineItems on order.Number equals item.OrderNumber
+                       join product in _context.Products on item.ProductId equals product.Id
+                       where product.Price * item.Quantity > sum
+                       select new CustomerInvestmentsView{ 
+                           Email = customer.Email, 
+                           Sum = product.Price * item.Quantity };
 
-        private async Task CreateItems(OrderModel order)
-        {
-            var _context = dbContextFactory.Create(typeof(OrderRepository));
-
-            foreach (var item in order.Items)
-            {
-                await _context.LineItems.AddAsync(new LineItem
-                {
-                    OrderNumber = order.Number,
-                    ProductId = item.ProductId,
-                    Quantity = item.Quantity
-                });
-            }
-        }
-
-        private async Task CreateCustomer(OrderModel order)
-        {
-            var _context = dbContextFactory.Create(typeof(OrderRepository));
-
-            var customer = await _context.Customers.FindAsync(order.Customer.Email);
-
-            if (customer == null)
-                await _context.Customers.AddAsync(order.Customer);
+            return await join.ToListAsync();
         }
 
         public async Task<bool> TryToCreate(OrderModel order)
@@ -120,10 +98,53 @@ namespace Store.Memory
             }
         }
 
-        public Task<object> GetCustomerById(string id)
+        private async Task CreateItems(OrderModel order)
         {
-            throw new System.NotImplementedException();
+            var _context = dbContextFactory.Create(typeof(OrderRepository));
+
+            foreach (var item in order.Items)
+            {
+                await _context.LineItems.AddAsync(new LineItem
+                {
+                    OrderNumber = order.Number,
+                    ProductId = item.ProductId,
+                    Quantity = item.Quantity
+                });
+            }
+        }
+
+        private async Task CreateCustomer(OrderModel order)
+        {
+            var _context = dbContextFactory.Create(typeof(OrderRepository));
+
+            var customer = await _context.Customers.FindAsync(order.Customer.Email);
+
+            if (customer == null)
+                await _context.Customers.AddAsync(order.Customer);
+        }
+
+        public async Task<IEnumerable<CustomerOrders>> GetCustomerOrdersById(string id)
+        {
+            var _context = dbContextFactory.Create(typeof(OrderRepository));
+
+            var join = from order in _context.Orders
+                       join item in _context.LineItems on order.Number equals item.OrderNumber
+                       join product in _context.Products on item.ProductId equals product.Id
+                       where order.CustomerEmail == id
+                       select new
+                       {
+                           order.Number,
+                           product.Price,
+                           item.Quantity
+                       };
+            var result = join.GroupBy(o => o.Number)
+                                .Select(g => new CustomerOrders
+                                {
+                                    Number = g.Key,
+                                    Sum = g.Sum(g => g.Price * g.Quantity)
+                                });
+
+            return await result.ToListAsync();
         }
     }
-
 }

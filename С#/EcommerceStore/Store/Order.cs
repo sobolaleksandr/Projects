@@ -9,11 +9,14 @@ namespace Store
     {
         public int Id { get; set; }
 
+        [Required]
         public int Number { get; set; }
 
-        //[DataType(DataType.Date)]
+        [Required]
+        [DataType(DataType.Date)]
         public DateTime Created { get; set; }
 
+        [Required]
         public string CustomerEmail { get; set; }
     }
 }

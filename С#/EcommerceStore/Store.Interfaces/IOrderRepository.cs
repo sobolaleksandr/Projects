@@ -14,10 +14,10 @@ namespace Store
 
         Task<Order> Delete(int id);
 
-        Task<Customer[]> GetAllBySum(decimal sum);
+        Task<IEnumerable<CustomerInvestmentsView>> GetCustomersBySum(decimal sum);
 
         Task<Order> GetByNumber(int number);
 
-        Task<object> GetCustomerById(string id);
+        Task<IEnumerable<CustomerOrders>> GetCustomerOrdersById(string id);
     }
 }

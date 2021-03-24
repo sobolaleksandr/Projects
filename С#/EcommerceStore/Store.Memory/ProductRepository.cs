@@ -37,6 +37,7 @@ namespace Store.Memory
             var _context = dbContextFactory.Create(typeof(ProductRepository));
 
             var product = await _context.Products.FindAsync(id);
+
             if (product == null)
                 return null;
 
@@ -51,13 +52,6 @@ namespace Store.Memory
             var _context = dbContextFactory.Create(typeof(ProductRepository));
 
             return await _context.Products.FindAsync(id);
-        }
-
-        public async Task<Product> GetByName(string name)
-        {
-            var _context = dbContextFactory.Create(typeof(ProductRepository));
-
-            return await _context.Products.Where(p => p.Name == name).FirstOrDefaultAsync();
         }
 
         public async Task<bool> Update(int id, Product product)
@@ -78,23 +72,27 @@ namespace Store.Memory
             return true;
         }
 
-        public async Task<IEnumerable<Product>> GetAllSortedByPopularity()
+        public async Task<IEnumerable<ProductView>> GetAllByPopularity()
         {
             var _context = dbContextFactory.Create(typeof(ProductRepository));
 
-            string sqlQuery =
-" select Products.Name, count(*) as Count, " +
-" sum(LineItems.Quantity) as Quantity from Products "+
-" LEFT OUTER JOIN "+
-" LineItems on Products.Id = LineItems.ProductId "+
-" group by Products.name "+
-" order by count(*) desc "
-                ;
-            var result = await _context.Products.FromSqlRaw(sqlQuery)
-                                          .ToListAsync();
+            var join = from product in _context.Products
+                       join item in _context.LineItems on product.Id equals item.ProductId into gj
+                       from sub in gj.DefaultIfEmpty()
+                       select new { product.Name, sub.Quantity};
 
-            return await _context.Products.FromSqlRaw(sqlQuery)
-                                          .ToListAsync();
+            var result = await join.GroupBy(u => u.Name)
+                             .Select(g => new ProductView
+                             {
+                                 Name = g.Key,
+                                 Popularity = g.Count(),
+                                 Quantity = g.Sum(c => c.Quantity)
+                             })
+                             .OrderByDescending(g => g.Popularity)
+                             .ThenByDescending(g => g.Quantity)
+                             .ToListAsync();
+
+            return result;
         }
 
         public async Task<List<Product>> GetAll()

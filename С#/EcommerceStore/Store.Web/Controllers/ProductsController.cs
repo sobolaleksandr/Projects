@@ -23,9 +23,9 @@ namespace Store.Web.Controllers
         //Возращаем список продуктов, отсортированных по популярности
         //для кажого продукта указываем общее количество проданных единиц
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
+        public async Task<ActionResult<IEnumerable<ProductView>>> GetProducts()
         {
-            return new ObjectResult(await productService.GetAll());
+            return new ObjectResult(await productService.GetAllByPopularity());
         }
 
         //Оставил реализацию по-умолчанию

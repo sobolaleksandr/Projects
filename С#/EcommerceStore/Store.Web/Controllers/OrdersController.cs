@@ -22,33 +22,24 @@ namespace Store.Web.Controllers
 
         //Список клиентов, заказавших товара на сумму, превышающую указанную
         [HttpGet]
-        public async Task<ActionResult<Customer[]>> GetCustomers(decimal sum)
+        public async Task<ActionResult<IEnumerable<CustomerInvestmentsView>>> 
+            GetCustomersBySum(decimal sum)
         {
             if (sum >= 0)
-            {
                 return new ObjectResult(await orderService.GetAllBySum(sum));
-            }
 
             return BadRequest();
         }
 
         //Список заказов для указанного клиента, с указанием общей стоимости каждого
         [HttpGet("{id}")]
-        public async Task<ActionResult<IEnumerable<Order>>> GetCustomer(string id)
+        public async Task<ActionResult<IEnumerable<CustomerOrders>>> 
+            GetCustomerOrders(string id)
         {
             if (id == default)
-            {
                 return BadRequest();
-            }
 
-            var customer = orderService.GetCustomerById(id);
-
-            //if (customer.Count() == 0)
-            //{
-            //    return NotFound();
-            //}
-
-            return new ObjectResult(customer);
+            return new ObjectResult(await orderService.GetCustomerOrdersById(id));
         }
 
         //Оставил реализацию по-умолчанию
@@ -56,14 +47,10 @@ namespace Store.Web.Controllers
         public async Task<IActionResult> UpdateOrder(int id, Order order)
         {
             if (id != order.Id)
-            {
                 return BadRequest("");
-            }
 
             if (await orderService.Update(id, order))
-            {
                 return NoContent();
-            }
 
             return NotFound();
         }
@@ -87,9 +74,7 @@ namespace Store.Web.Controllers
             var order = await orderService.Delete(id);
 
             if (order == null)
-            {
                 return NotFound();
-            }
 
             return new ObjectResult(order);
         }

@@ -8,8 +8,8 @@ namespace Store
     {
         public string Name { get; set; }
 
-        //[EmailAddress(ErrorMessage = "Некорректный адрес")]
         [Key]
+        [EmailAddress(ErrorMessage = "Некорректный адрес")]
         public string Email { get; set; }
     }
 }

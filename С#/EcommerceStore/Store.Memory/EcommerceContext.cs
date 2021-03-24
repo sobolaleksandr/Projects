@@ -10,15 +10,19 @@ namespace Store.Memory
         public DbSet<Order> Orders { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<LineItem> LineItems { get; set; }
-        public DbSet<OrderModel> OrderModels { get; set; }
 
         public EcommerceContext(DbContextOptions<EcommerceContext> options)
             : base(options)
         {
+            Database.EnsureCreated();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Ignore<OrderModel>();
+            modelBuilder.Ignore<ProductView>();
+            modelBuilder.Ignore<LineItemModel>();
+            modelBuilder.Ignore<CustomerInvestmentsView>();
             BuildProducts(modelBuilder);
             BuildCustomers(modelBuilder);
             BuildOrders(modelBuilder);
@@ -55,29 +59,6 @@ namespace Store.Memory
             modelBuilder.Entity<Order>(action =>
             {
                 action.HasAlternateKey(u => new { u.Number });//номер заказа уникален
-
-                //action.HasData(
-                //new 
-                //{
-                //    Id = 1,
-                //    Created = DateTime.Today,
-                //    Number = 1,
-                //    CustomerId = 1
-                //}
-                //,
-                //new Order
-                //{
-                //    Created = DateTime.Today,
-                //    Number = 2,
-                //    Customer = new Customer { Id = 1, Name = "Tom", Email = "Tomt@yahoo.com" }
-                //},
-                //new Order
-                //{
-                //    Created = DateTime.Today,
-                //    Number = 3,
-                //    Customer = new Customer { Id = 1, Name = "Tom", Email = "Tomt@yahoo.com" }
-                //}
-                //);
             });
         }
     }

@@ -4,11 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore; 
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Reflection;
-using System.IO;
 using Store.Memory;
-using Microsoft.OpenApi.Models;
 using Store.Web.App;
 
 namespace Store.Web
