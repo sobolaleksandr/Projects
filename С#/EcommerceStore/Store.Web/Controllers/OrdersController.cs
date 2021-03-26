@@ -23,10 +23,10 @@ namespace Store.Web.Controllers
         //Список клиентов, заказавших товара на сумму, превышающую указанную
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CustomerInvestmentsView>>> 
-            GetCustomersBySum(decimal sum)
+            GetCustomersInvestmentsBySum(decimal sum)
         {
             if (sum >= 0)
-                return new ObjectResult(await orderService.GetCustomerBySum(sum));
+                return new ObjectResult(await orderService.GetCustomerInvestmentsBySum(sum));
 
             return BadRequest();
         }
@@ -34,7 +34,7 @@ namespace Store.Web.Controllers
         //Список заказов для указанного клиента, с указанием общей стоимости каждого
         [HttpGet("{id}")]
         public async Task<ActionResult<IEnumerable<CustomerOrders>>> 
-            GetCustomerOrdersById(string id)
+            GetCustomerOrders(string id)
         {
             if (id == default)
                 return BadRequest();

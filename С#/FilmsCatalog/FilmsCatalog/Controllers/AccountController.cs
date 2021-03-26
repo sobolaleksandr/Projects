@@ -32,9 +32,7 @@ namespace FilmsCatalog.Controllers
         public async Task<IActionResult> SignUp(SignUpViewModel model)
         {
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
             
             var user = new User
             {

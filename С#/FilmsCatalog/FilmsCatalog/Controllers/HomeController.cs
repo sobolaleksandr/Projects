@@ -36,9 +36,9 @@ namespace FilmsCatalog.Controllers
         [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
-            if (id != null)
+            if (!id.HasValue)
             {
-                Movie movie = await _context.Movies.FirstOrDefaultAsync(p => p.ID == id);
+                Movie movie = await _context.Movies.FirstOrDefaultAsync(p => p.ID == id.Value);
 
                 if (movie != null)
                     return View(movie);
@@ -52,9 +52,9 @@ namespace FilmsCatalog.Controllers
         {
             if (_signInManager.IsSignedIn(User))
             {
-                if (id != null)
+                if (!id.HasValue)
                 {
-                    Movie movie = await _context.Movies.FirstOrDefaultAsync(p => p.ID == id);
+                    Movie movie = await _context.Movies.FirstOrDefaultAsync(p => p.ID == id.Value);
                     if (movie != null)
                     {
                         if (movie.Added == User.Identity.Name)
@@ -90,7 +90,7 @@ namespace FilmsCatalog.Controllers
             if (_signInManager.IsSignedIn(User))
             {
                 AddOrUpdateEntity(movie);
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
 
             return RedirectToAction(nameof(BadLogin));

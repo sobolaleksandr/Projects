@@ -21,7 +21,7 @@ namespace Store.Web.App
             this.productRepository = productRepository;
         }
 
-        public async Task<IEnumerable<CustomerInvestmentsView>> GetCustomerBySum(decimal sum)
+        public async Task<IEnumerable<CustomerInvestmentsView>> GetCustomerInvestmentsBySum(decimal sum)
         {
             return await orderRepository.GetCustomersBySum(sum);
         }
