@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,10 @@ namespace AB.Domain.Models
 {
     public class HistogramColumn
     {
+        [JsonProperty(PropertyName = nameof(Day))]
         public DateTime Day { get; set; }
+
+        [JsonProperty(PropertyName = nameof(Value))]
         public double Value { get; set; }
 
         public HistogramColumn(double returned, double installed, DateTime day)

@@ -7,7 +7,9 @@ namespace AB.Domain
 {
     public interface IRecordsRepository
     {
-        Task<bool> TryToAddRecords(IEnumerable<Record> records);
+        bool ValidateRecords(IEnumerable<tblRecord> records);
+
+        Task<bool> TryToAddRecords(IEnumerable<tblRecord> records);
 
         Task<int> GetReturned(DateTime day);
 

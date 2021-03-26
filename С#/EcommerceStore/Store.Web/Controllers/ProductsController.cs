@@ -63,10 +63,8 @@ namespace Store.Web.Controllers
             if (ModelState.IsValid)
             {
                 if (await productService.TryToCreate(product))
-                {
                     return CreatedAtAction(nameof(GetProduct), 
                         new { id = product.Name }, product);
-                }
 
                 return Conflict();
             }

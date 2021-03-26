@@ -1,4 +1,5 @@
 using AB.Domain;
+using AB.Domain.Models;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -10,16 +11,20 @@ namespace AB.Services.Tests
 {
     public class RecordsServiceTests
     {
-        readonly List<Domain.Models.Record> records = new()
+        readonly List<Domain.Models.tblRecord> records = new()
         {
-                new Domain.Models.Record {
-                    Id = Guid.NewGuid().ToString(),
-                    RegistrationDate=new DateTime(1999,10,5),
-                    LastActivityDate=new DateTime(1999,10,25) },
-                new Domain.Models.Record {
-                    Id = Guid.NewGuid().ToString(),
-                    RegistrationDate=new DateTime(2005,10,5),
-                    LastActivityDate=new DateTime(2005,10,5) },
+            new Domain.Models.tblRecord
+            {
+                Id = Guid.NewGuid().ToString(),
+                RegistrationDate = new DateTime(1999, 10, 5),
+                LastActivityDate = new DateTime(1999, 10, 25)
+            },
+            new Domain.Models.tblRecord
+            {
+                Id = Guid.NewGuid().ToString(),
+                RegistrationDate = new DateTime(2005, 10, 5),
+                LastActivityDate = new DateTime(2005, 10, 5)
+            },
         };
 
         [Fact]
@@ -30,6 +35,11 @@ namespace AB.Services.Tests
             mock.Setup(repo => repo.TryToAddRecords(records))
                 .ReturnsAsync(false)
                 .Verifiable();
+
+            mock.Setup(repo =>
+                 repo.ValidateRecords(records))
+                 .Returns(true)
+                 .Verifiable();
 
             var service = new RecordsService(mock.Object);
 
@@ -50,6 +60,11 @@ namespace AB.Services.Tests
                 .ReturnsAsync(true)
                 .Verifiable();
 
+            mock.Setup(repo =>
+                 repo.ValidateRecords(records))
+                 .Returns(true)
+                 .Verifiable();
+
             var service = new RecordsService(mock.Object);
 
             // Act
@@ -59,6 +74,7 @@ namespace AB.Services.Tests
             Assert.True(result);
             mock.Verify();
         }
+
 
         [Fact]
         public async Task Calculate_WithDays_ReturnsList()
@@ -79,7 +95,7 @@ namespace AB.Services.Tests
             var service = new RecordsService(mock.Object);
 
             // Act
-            var result = await service.Calculate(7);
+            var result = await service.CalculateHistogram(7);
             var list = result.ToList();
 
             // Assert

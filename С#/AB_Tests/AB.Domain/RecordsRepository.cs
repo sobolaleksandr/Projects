@@ -9,15 +9,15 @@ namespace AB.Domain
 {
     public class RecordsRepository : IRecordsRepository
     {
-        private readonly List<Domain.Models.Record> dbContext = new()
+        private readonly List<tblRecord> dbContext = new()
         {
-            new Domain.Models.Record
+            new tblRecord
             {
                 Id = Guid.NewGuid().ToString(),
                 RegistrationDate = new DateTime(1999, 10, 5),
                 LastActivityDate = new DateTime(1999, 10, 25)
             },
-            new Domain.Models.Record
+            new tblRecord
             {
                 Id = Guid.NewGuid().ToString(),
                 RegistrationDate = new DateTime(2005, 10, 5),
@@ -34,10 +34,10 @@ namespace AB.Domain
         public Task<int> GetReturned(DateTime day)
         {
             return Task.FromResult(dbContext.Where(d => d.RegistrationDate <= day)
-                              .Count());
+                            .Count());
         }
 
-        public async Task<bool> TryToAddRecords(IEnumerable<Record> records)
+        public async Task<bool> TryToAddRecords(IEnumerable<tblRecord> records)
         {
             foreach (var record in records)
                 if (!(await TryToAddRecord(record)))
@@ -46,9 +46,18 @@ namespace AB.Domain
             return true;
         }
 
-        public Task<bool> TryToAddRecord(Record record)
+        public bool ValidateRecords(IEnumerable<tblRecord> records)
         {
-            if (record.LastActivityDate<record.RegistrationDate)
+            if (records != null)
+                if (records.Any())
+                    return true;
+
+            return false;
+        }
+
+        public Task<bool> TryToAddRecord(tblRecord record)
+        {
+            if (record.LastActivityDate < record.RegistrationDate)
                 return Task.FromResult(false);
 
             record.Id = Guid.NewGuid().ToString();

@@ -16,15 +16,16 @@ namespace AB.Services
             this.recordsRepository = recordsRepository;
         }
 
-        public async Task<bool> TryToAddRecords(IEnumerable<Record> records)
+        public async Task<bool> TryToAddRecords(IEnumerable<tblRecord> records)
         {
-            if (await recordsRepository.TryToAddRecords(records))
-                return true;
+            if (recordsRepository.ValidateRecords(records))
+                if (await recordsRepository.TryToAddRecords(records))
+                    return true;
 
             return false;
         }
 
-        public async Task<IEnumerable<HistogramColumn>> Calculate(int days)
+        public async Task<IEnumerable<HistogramColumn>> CalculateHistogram(int days)
         {
             List<HistogramColumn> histogram = new();
 

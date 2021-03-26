@@ -8,7 +8,9 @@ using System.Threading.Tasks;
 
 namespace AB.Controllers
 {
+    [Produces("application/json")]
     [Route("api/[controller]")]
+    [ApiController]
     public class RecordsController : Controller
     {
         private readonly RecordsService recordsService;
@@ -18,7 +20,7 @@ namespace AB.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Save(IEnumerable<Record> records)
+        public async Task<IActionResult> Save(IEnumerable<tblRecord> records)
         {
             if (await recordsService.TryToAddRecords(records))
                 return Ok(records);
@@ -27,8 +29,8 @@ namespace AB.Controllers
         }
 
         [HttpGet]
-        public async Task<IEnumerable<HistogramColumn>> Calculate(int days = 7) => 
-            await recordsService.Calculate(days);
+        public async Task<IEnumerable<HistogramColumn>> CalculateHistogram(int days = 7) => 
+            await recordsService.CalculateHistogram(days);
 
     }
 }

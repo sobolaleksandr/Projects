@@ -3,21 +3,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31112.23
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AB", "AB.csproj", "{FAC83C85-131C-4B5A-A2D4-0C52FE49116C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AB", "AB.csproj", "{FAC83C85-131C-4B5A-A2D4-0C52FE49116C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AB.Domain", "..\AB.Domain\AB.Domain.csproj", "{07ABBBD2-9B13-4FE0-8108-0608FD863ED5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AB.Domain", "..\AB.Domain\AB.Domain.csproj", "{07ABBBD2-9B13-4FE0-8108-0608FD863ED5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AB.Services", "..\AB.Services\AB.Services.csproj", "{7AFD9A8A-10BD-4DB5-AEDF-021EF1F09102}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AB.Services", "..\AB.Services\AB.Services.csproj", "{7AFD9A8A-10BD-4DB5-AEDF-021EF1F09102}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AB.Services.Tests", "..\AB.Services.Tests\AB.Services.Tests.csproj", "{CEF1F7E8-F695-4A36-B06E-956E93EE58A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AB.Services.Tests", "..\AB.Services.Tests\AB.Services.Tests.csproj", "{CEF1F7E8-F695-4A36-B06E-956E93EE58A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AB.Domain.Tests", "..\AB.Domain.Models.Tests\AB.Domain.Tests.csproj", "{490B550E-DB86-4F68-B921-B17DFB178EB9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AB.Domain.Tests", "..\AB.Domain.Models.Tests\AB.Domain.Tests.csproj", "{490B550E-DB86-4F68-B921-B17DFB178EB9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "domain", "domain", "{B88AE439-7D0E-4804-A036-BE589DF9FF8C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "infrostructure", "infrostructure", "{704C377D-D2DC-4449-B8AF-4177F17E59FC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "presentation", "presentation", "{AB998424-D499-47FF-AC44-B3AA3AD55C65}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AB.Tests", "..\AB.Tests\AB.Tests.csproj", "{E3B35226-EA81-44C0-AF39-4DF4E0AF3CD9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{490B550E-DB86-4F68-B921-B17DFB178EB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{490B550E-DB86-4F68-B921-B17DFB178EB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{490B550E-DB86-4F68-B921-B17DFB178EB9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3B35226-EA81-44C0-AF39-4DF4E0AF3CD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3B35226-EA81-44C0-AF39-4DF4E0AF3CD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3B35226-EA81-44C0-AF39-4DF4E0AF3CD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3B35226-EA81-44C0-AF39-4DF4E0AF3CD9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,6 +61,7 @@ Global
 		{7AFD9A8A-10BD-4DB5-AEDF-021EF1F09102} = {704C377D-D2DC-4449-B8AF-4177F17E59FC}
 		{CEF1F7E8-F695-4A36-B06E-956E93EE58A1} = {704C377D-D2DC-4449-B8AF-4177F17E59FC}
 		{490B550E-DB86-4F68-B921-B17DFB178EB9} = {B88AE439-7D0E-4804-A036-BE589DF9FF8C}
+		{E3B35226-EA81-44C0-AF39-4DF4E0AF3CD9} = {AB998424-D499-47FF-AC44-B3AA3AD55C65}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7B9CB18-9ACD-4BC5-82B6-F5B4BC0210F6}

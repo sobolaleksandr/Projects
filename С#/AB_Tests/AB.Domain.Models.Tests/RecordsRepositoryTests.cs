@@ -1,4 +1,4 @@
-﻿using AB.Domain.Models;
+﻿ using AB.Domain.Models;
 using System;
 using System.Collections.Generic;
 using Xunit;
@@ -7,15 +7,15 @@ namespace AB.Domain.Tests
 {
     public class RecordsRepositoryTests
     {
-        private readonly List<Domain.Models.Record> dbContext = new()
+        private readonly List<Domain.Models.tblRecord> dbContext = new()
         {
-            new Domain.Models.Record
+            new Domain.Models.tblRecord
             {
                 Id = Guid.NewGuid().ToString(),
                 RegistrationDate = new DateTime(1999, 10, 5),
                 LastActivityDate = new DateTime(1999, 10, 25)
             },
-            new Domain.Models.Record
+            new Domain.Models.tblRecord
             {
                 Id = Guid.NewGuid().ToString(),
                 RegistrationDate = new DateTime(2005, 10, 5),
@@ -68,7 +68,7 @@ namespace AB.Domain.Tests
         {
             RecordsRepository repo = new();
 
-            bool result = await repo.TryToAddRecord(new Domain.Models.Record
+            bool result = await repo.TryToAddRecord(new Domain.Models.tblRecord
             {
                 Id = Guid.NewGuid().ToString(),
                 RegistrationDate = new DateTime(1999, 10, 26),
@@ -83,7 +83,7 @@ namespace AB.Domain.Tests
         {
             RecordsRepository repo = new();
 
-            bool result = await repo.TryToAddRecord(new Domain.Models.Record
+            bool result = await repo.TryToAddRecord(new Domain.Models.tblRecord
             {
                 Id = Guid.NewGuid().ToString(),
                 RegistrationDate = new DateTime(1999, 10, 20),
@@ -91,6 +91,26 @@ namespace AB.Domain.Tests
             });
 
             Assert.True(result);
+        }
+
+        [Fact]
+        public void ValidateRecords_WithNull_ReturnsFalse()
+        {
+            RecordsRepository repo = new();
+
+            bool result =  repo.ValidateRecords(null);
+
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void ValidateRecords_WithZeroRecords_ReturnsFalse()
+        {
+            RecordsRepository repo = new();
+
+            bool result =  repo.ValidateRecords(new List<Models.tblRecord>());
+
+            Assert.False(result);
         }
     }
 }
