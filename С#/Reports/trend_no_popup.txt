@@ -1,0 +1,188 @@
+Sub trend_no_popup(objpick As GwxPick)
+    Dim ralias As String, point As String
+    Dim ComputerName As String
+    Dim stitle As String
+    Dim vObj As GwxVisible
+    Dim trendTag As String
+    Dim szPos As Integer
+    Dim s As String
+    Dim addexe As Boolean
+On Error GoTo termproc
+
+    Set vObj = ThisDisplay.GetHeadObject
+    ClearAliasList
+    If Not (vObj Is Nothing) Then Call FillAliasListFromVisObject(vObj)
+
+    stitle = "InfinityTrends"
+    iHwnd = blnFindWindow(stitle)
+    If iHwnd = 0 Then addexe = True
+    
+    
+    s = GetDispDirectory(ThisDisplay) & "TrendAdd.sgl"
+    Set FS = CreateObject("Scripting.FileSystemObject")
+    Set ts = FS.OpenTextFile(s, ForWriting, True)
+
+    ralias = FillTag
+    
+    'If InStr(1, ralias, "Lensk", vbTextCompare) > 0 Then
+    'ralias = Replace(ralias, "MG", "Lensk_LPU.MG")        'tag = "MG.LEVEL.Lensk"
+    'ElseIf InStr(1, ralias, "Aldan", vbTextCompare) > 0 Then ralias = Replace(ralias, "MG", "Habarovsk_RDP.MG")    'tag = "MG.LEVEL.Aldan"
+    'ElseIf InStr(1, ralias, "Nerungri", vbTextCompare) > 0 Then ralias = Replace(ralias, "MG", "Habarovsk_RDP.MG")    'tag = "MG.LEVEL.Nerungri"
+    'ElseIf InStr(1, ralias, "Skovorodino", vbTextCompare) > 0 Then ralias = Replace(ralias, "MG", "Habarovsk_RDP.MG")    ' tag = "MG.LEVEL.Skovorodino"
+    'ElseIf InStr(1, ralias, "Blagoveschensk", vbTextCompare) > 0 Then ralias = Replace(ralias, "MG", "Habarovsk_RDP.MG")    'tag = "MG.LEVEL.Belogorsk"
+    'ElseIf InStr(1, ralias, "RDP.DIAG", vbTextCompare) > 0 Then ralias = Replace(ralias, "RDP.DIAG", "Habarovsk_RDP.RDP.DIAG")
+    'ElseIf InStr(1, ralias, "CDP.DIAG", vbTextCompare) > 0 Then ralias = Replace(ralias, "CDP.DIAG", "Tomsk_CDP.CDP.DIAG")
+    'ElseIf InStr(1, ralias, "LPU.DIAG", vbTextCompare) > 0 Then ralias = Replace(ralias, "LPU.DIAG", "Lensk_LPU.LPU.DIAG")
+   '
+    'ElseIf InStr(1, ralias, "UT03", vbTextCompare) > 0 Then ralias = Replace(ralias, "GT13.UF02.UT03", "Habarovsk_LPU.GT13.UF02.UT03")
+    'ElseIf InStr(1, ralias, "UT0", vbTextCompare) > 0 Then ralias = Replace(ralias, "GT13.UF02.UT0", "Habarovsk_RDP.GT13.UF02.UT0")
+    'End If
+    SysDrv = GetEnvString("SystemDrive")
+    
+    trendTag = LCase(objpick.UserCustomData)
+    
+    If InStr(trendTag, "out") > 0 Then
+ '       If InStr(trendTag, "task2") > 0 Then
+ '               ralias = ralias & Trim(trendTag)
+ '               ts.writeline (ralias)
+ '               ralias = Replace(ralias, "point1", "point2")
+ '               ts.writeline (ralias)
+            'comstr = Environ("ProgramFiles") & cTrendsPath & "InfinityTrends.exe File=" & GetDispDirectory(ThisDisplay) & "1.txt"
+ '       Else
+            ralias = ralias & Trim(trendTag)
+            If InStr(trendTag, "task11") > 0 Then ralias = ralias & ".prc"
+            ts.writeline (ralias)
+'        End If
+
+
+    'comstr = Environ("ProgramFiles") & cTrendsPath & "InfinityTrends.exe File=" & GetDispDirectory(ThisDisplay) & "1.txt"
+
+    Else
+    
+    'comstr = Environ("ProgramFiles") & cTrendsPath & "InfinityTrends.exe tag=" & ralias  ' & " -mode sform"
+    ts.writeline (ralias)
+    Set FS = Nothing
+   
+    End If
+    comstr = Environ("ProgramFiles") & cTrendsPath & "InfinityTrends.exe File=" & GetDispDirectory(ThisDisplay) & "TrendAdd.sgl"
+    If addexe Then Execute (comstr)
+    
+    Set vObj = Nothing
+    Exit Sub
+termproc:
+    Call MsgTopBox("Ошибка в процедуре FillAliasListFromVisObject с кодом " & Err.number & "  " & Err.Description, vbExclamation, cTitle)
+    Set vObj = Nothing
+End SubSub trend_no_popup(objpick As GwxPick)
+    Dim ralias As String, point As String
+    Dim ComputerName As String
+    Dim stitle As String
+    Dim vObj As GwxVisible
+    Dim trendTag As String
+    Dim szPos As Integer
+    Dim s As String
+    Dim addexe As Boolean
+On Error GoTo termproc
+
+    Set vObj = ThisDisplay.GetHeadObject
+    ClearAliasList
+    If Not (vObj Is Nothing) Then Call FillAliasListFromVisObject(vObj)
+
+    stitle = "InfinityTrends"
+    iHwnd = blnFindWindow(stitle)
+    If iHwnd = 0 Then addexe = True
+    
+    
+    s = GetDispDirectory(ThisDisplay) & "TrendAdd.sgl"
+    Set FS = CreateObject("Scripting.FileSystemObject")
+    Set ts = FS.OpenTextFile(s, ForWriting, True)
+
+    ralias = FillTag
+    
+    'If InStr(1, ralias, "Lensk", vbTextCompare) > 0 Then
+    'ralias = Replace(ralias, "MG", "Lensk_LPU.MG")        'tag = "MG.LEVEL.Lensk"
+    'ElseIf InStr(1, ralias, "Aldan", vbTextCompare) > 0 Then ralias = Replace(ralias, "MG", "Habarovsk_RDP.MG")    'tag = "MG.LEVEL.Aldan"
+    'ElseIf InStr(1, ralias, "Nerungri", vbTextCompare) > 0 Then ralias = Replace(ralias, "MG", "Habarovsk_RDP.MG")    'tag = "MG.LEVEL.Nerungri"
+    'ElseIf InStr(1, ralias, "Skovorodino", vbTextCompare) > 0 Then ralias = Replace(ralias, "MG", "Habarovsk_RDP.MG")    ' tag = "MG.LEVEL.Skovorodino"
+    'ElseIf InStr(1, ralias, "Blagoveschensk", vbTextCompare) > 0 Then ralias = Replace(ralias, "MG", "Habarovsk_RDP.MG")    'tag = "MG.LEVEL.Belogorsk"
+    'ElseIf InStr(1, ralias, "RDP.DIAG", vbTextCompare) > 0 Then ralias = Replace(ralias, "RDP.DIAG", "Habarovsk_RDP.RDP.DIAG")
+    'ElseIf InStr(1, ralias, "CDP.DIAG", vbTextCompare) > 0 Then ralias = Replace(ralias, "CDP.DIAG", "Tomsk_CDP.CDP.DIAG")
+    'ElseIf InStr(1, ralias, "LPU.DIAG", vbTextCompare) > 0 Then ralias = Replace(ralias, "LPU.DIAG", "Lensk_LPU.LPU.DIAG")
+   '
+    'ElseIf InStr(1, ralias, "UT03", vbTextCompare) > 0 Then ralias = Replace(ralias, "GT13.UF02.UT03", "Habarovsk_LPU.GT13.UF02.UT03")
+    'ElseIf InStr(1, ralias, "UT0", vbTextCompare) > 0 Then ralias = Replace(ralias, "GT13.UF02.UT0", "Habarovsk_RDP.GT13.UF02.UT0")
+    'End If
+    SysDrv = GetEnvString("SystemDrive")
+    
+    trendTag = LCase(objpick.UserCustomData)
+    
+    If InStr(trendTag, "out") > 0 Then
+ '       If InStr(trendTag, "task2") > 0 Then
+ '               ralias = ralias & Trim(trendTag)
+ '               ts.writeline (ralias)
+ '               ralias = Replace(ralias, "point1", "point2")
+ '               ts.writeline (ralias)
+            'comstr = Environ("ProgramFiles") & cTrendsPath & "InfinityTrends.exe File=" & GetDispDirectory(ThisDisplay) & "1.txt"
+ '       Else
+            ralias = ralias & Trim(trendTag)
+            If InStr(trendTag, "task11") > 0 Then ralias = ralias & ".prc"
+            ts.writeline (ralias)
+'        End If
+
+
+    'comstr = Environ("ProgramFiles") & cTrendsPath & "InfinityTrends.exe File=" & GetDispDirectory(ThisDisplay) & "1.txt"
+
+    Else
+    
+    'comstr = Environ("ProgramFiles") & cTrendsPath & "InfinityTrends.exe tag=" & ralias  ' & " -mode sform"
+    'ts.writeline (rAlias)
+    '''''''''''''''''''''''''''''
+    iRet = GetOPCValue(rAlias & ".EUnit", units)
+    iRet = GetOPCValue(rAlias & ".Description", desc)
+    iRet = GetOPCValue(rAlias & ".xa.wLowEngin", wLowEngin)
+    iRet = GetOPCValue(rAlias & ".xa.wHighEngin", wHighEngin)
+    iRet = GetOPCValue(rAlias & ".xa.set1", wLoLo)
+    iRet = GetOPCValue(rAlias & ".xa.set4", wHiHi)
+    
+    ' формирование файла sgl с параметрами
+    arr(1) = rAlias         ' полное имя сигнала
+    arr(2) = "0"            ' числовой идентификатор сигнала (не используется, значение всегда должно быть 0)
+    arr(3) = desc           ' описание сигнала
+    arr(4) = "13705266"     ' цвет линии сигнала хорошего качества
+    arr(5) = "1"            ' признак ведения истории по сигналу
+    arr(6) = units          ' единицы измерения
+    arr(7) = "1"            ' толщина линии сигнала хорошего качества
+    arr(8) = "1"            ' тип графика
+    arr(9) = "0"            ' признак наличия минимального нормативного значения
+    arr(10) = "0"           ' признак наличия максимального нормативного значения
+    arr(11) = "0"           ' минимальное нормативное значение
+    arr(12) = "0"           ' максимальное нормативное значение
+    arr(13) = "0"           ' признак автоматического определения минимального и максимального значений
+    arr(14) = wLowEngin     ' минимальное граничное значение
+    arr(15) = wHighEngin    ' максимальное граничное значение
+    arr(16) = "0"           ' стиль линии сигнала хорошего качества
+    arr(17) = "2"           ' стиль линии сигнала плохого качества
+    arr(18) = "13705266"    ' цвет линии сигнала плохого качества
+    arr(19) = "1"           ' толщина линии сигнала плохого качества
+    arr(20) = "0"           ' зарезервированный параметр. Всегда равен нулю
+    arr(21) = "1"           ' видимость сигнала в области графиков
+    
+    
+    Dim item As Variant
+    For Each item In arr
+    text = text & item & ";"
+    Next item
+
+    ts.writeline (text)
+    
+    Set FS = Nothing
+   
+    End If
+    comstr = Environ("ProgramFiles") & cTrendsPath & "InfinityTrends.exe File=" & GetDispDirectory(ThisDisplay) & "TrendAdd.sgl"
+    If addexe Then Execute (comstr)
+    
+    Set vObj = Nothing
+    Exit Sub
+termproc:
+    Call MsgTopBox("Ошибка в процедуре FillAliasListFromVisObject с кодом " & Err.number & "  " & Err.Description, vbExclamation, cTitle)
+    Set vObj = Nothing
+End Sub

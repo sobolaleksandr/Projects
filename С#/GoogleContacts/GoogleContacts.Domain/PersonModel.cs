@@ -15,9 +15,9 @@ namespace GoogleContacts.Domain
         public string modelGivenName;
         public string modelFamilyName;
         public string modelPhoneNumber;
-        public  string modelEmail;
-        private string modelOrganization;
-        private ContactGroupMembership modelMembership;
+        public string modelEmail;
+        public string modelOrganization;
+        public ContactGroupMembership modelMembership;
 
         public Person Map()
         {

@@ -5,33 +5,25 @@ using Google.Apis.PeopleService.v1.Data;
 using System;
 using System.Threading;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace GoogleContacts.Domain
 {
-    public abstract class GoogleContacts
+    public class ContactService
     {
+        readonly PeopleServiceService service;
 
-    }
+        //private readonly string m_client_secret = "uavwQnDWY6bUEFf75pXtP0m6";
+        //private readonly string m_client_id = "217336154173-tdce9e8b3c9hjfsd9abnfb7q0ef4q9ab.apps.googleusercontent.com";
 
-
-    public static class GroupService
-    {
-        static PeopleServiceService service;
-        static ContactGroupsResource groupsResource;
-
-        private static readonly string m_client_secret = "uavwQnDWY6bUEFf75pXtP0m6";
-        private static readonly string m_client_id = "217336154173-tdce9e8b3c9hjfsd9abnfb7q0ef4q9ab.apps.googleusercontent.com";
-
-        public static void Initialize()
+        public ContactService(string client_secret, string client_id)
         {
             // Create OAuth credential.
             UserCredential credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
                 new ClientSecrets
                 {
-                    ClientId = m_client_id,
-                    ClientSecret = m_client_secret
+                    ClientId = client_id,
+                    ClientSecret = client_secret
                 },
                 new[] { "https://www.googleapis.com/auth/contacts" },
                 "user",
@@ -43,155 +35,48 @@ namespace GoogleContacts.Domain
                 HttpClientInitializer = credential,
                 ApplicationName = "My App",
             });
-
-            groupsResource = new ContactGroupsResource(service);
         }
 
-        public static async Task<List<GroupModel>> GetGroups()
+        public async Task<List<PersonModel>> GetAll(string personFields)
         {
-            List<GroupModel> groups = new();
+            List<PersonModel> contacts = new();
+            ListConnectionsResponse connectionsResponse;
 
-            if (groupsResource != null)
-            {
-                ListContactGroupsResponse response =
-                await TryGetGroups();
-
-                if (response != null)
-                    foreach (ContactGroup group in response.ContactGroups)
-                        groups.Add(new GroupModel(group));
-            }
-
-            return groups;
-        }
-
-        private static async Task<ListContactGroupsResponse> TryGetGroups()
-        {
-            try
-            {
-                return await groupsResource?.List().ExecuteAsync();
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        public static async Task<GroupModel> CreateGroup(GroupModel model)
-        {
-            if (model == null)
-                return null;
-
-            var request = new CreateContactGroupRequest
-            {
-                ContactGroup = model.Map()
-            };
-
-            ContactGroup response = await TryToCreateGroup(request);
-
-            return response != null? new GroupModel(response) : null;
-        }
-
-        private static async Task<ContactGroup> TryToCreateGroup(CreateContactGroupRequest request)
-        {
-            try
-            {
-                return await groupsResource.Create(request).ExecuteAsync();
-            }
-            catch
-            {
-                return null;
-            }
-        } 
-
-        public static async Task<GroupModel> UpdateGroup(GroupModel model)
-        {
-            if (model == null)
-                return null;
-
-            var request = new UpdateContactGroupRequest
-            {
-                ContactGroup = model.Map()
-            };
-
-            ContactGroup response = await TryToUpdateGroup(request, model.modelResourceName);
-
-            return response != null ? new GroupModel(response) : null;
-        }
-
-        private static async Task<ContactGroup> TryToUpdateGroup(UpdateContactGroupRequest request, string property)
-        {
-            try
-            {
-                return await groupsResource.Update(request, property).ExecuteAsync();
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        public static async Task<List<PersonModel>> GetContacts(string personFields)
-        {
             PeopleResource.ConnectionsResource.ListRequest peopleRequest =
               service.People.Connections.List("people/me");
             peopleRequest.PersonFields = personFields;
-            ListConnectionsResponse connectionsResponse = await peopleRequest.ExecuteAsync();
+
+            try
+            {
+                connectionsResponse = await peopleRequest.ExecuteAsync();
+            }
+            catch
+            {
+                return contacts;
+            }
+
             IList<Person> connections = connectionsResponse.Connections;
 
-            List<PersonModel> contacts = new();
-
-            foreach (var person in connections)
-                contacts.Add(new PersonModel(person));
+            if (connections != null)
+                foreach (var person in connections)
+                    contacts.Add(new PersonModel(person));
 
             return contacts;
         }
 
-        private static async Task<ContactGroup> TryToGet(UpdateContactGroupRequest request, string property)
+
+        public async Task<PersonModel> Create(PersonModel personModel)
         {
-            try
-            {
-                return await groupsResource.Update(request, property).ExecuteAsync();
-            }
-            catch
-            {
+            if (personModel == null)
                 return null;
-            }
-        }
 
-        public static async Task<bool> DeleteGroup(GroupModel model)
-        {
-            try
-            {
-                await groupsResource.Delete(model.modelResourceName).ExecuteAsync();
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        public static async Task<ModifyContactGroupMembersResponse> ModifyGroup(string groupResourceName, List<string> resources)
-        {
-            var members = groupsResource.Members;
-
-            ModifyContactGroupMembersRequest request = new ModifyContactGroupMembersRequest
-            {
-                ResourceNamesToAdd = resources
-            };
-
-            return await members.Modify(request, groupResourceName).ExecuteAsync();
-        }
-        
-
-        public static async Task<PersonModel> CreateContact(PersonModel personModel)
-        {
             var createdContact = await service.People.CreateContact(personModel.Map()).ExecuteAsync();
 
             return new PersonModel(createdContact);
         }
+
         //todo:get and update (coz etag after update changes)
-        public static async Task<PersonModel> UpdateContact(PersonModel personModel, string personFields)
+        public  async Task<PersonModel> UpdateContact(PersonModel personModel, string personFields)
         {
             Person person = personModel.Map();
             var updateRequest = service.People.UpdateContact(person, personModel.modelResourceName);
@@ -201,7 +86,7 @@ namespace GoogleContacts.Domain
             return new PersonModel(updatedContact);
         }
 
-        public static async Task<bool> TryToDeleteContact(PersonModel personModel)
+        public async Task<bool> TryToDeleteContact(PersonModel personModel)
         {
             try
             {
@@ -214,7 +99,7 @@ namespace GoogleContacts.Domain
             }
         }
 
-        public static async Task<List<PersonModel>> SearchContact(string query, string readMask)
+        public async Task<List<PersonModel>> SearchContact(string query, string readMask)
         {
             var request = service.People.SearchContacts();
             request.Query = query;

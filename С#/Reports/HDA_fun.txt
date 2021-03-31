@@ -1,0 +1,126 @@
+public List<HdaData> GetHistoryDataAll(DateTime startTime, DateTime stopTime, List<string> tags, bool goodOnly, bool includeBounds, string type)
+        {
+            try
+            {
+                var swMain = new Stopwatch();
+
+                if (_server == null)
+                {
+                    if (_debug)
+                    {
+                        _log.WriteEntry($"Объект сервера Null. Выход из функции.", EventLogEntryType.Error);
+                    }
+                    return null;
+                }
+                if (_server.IsConnected == false)
+                {
+                    if (_debug)
+                    {
+                        _log.WriteEntry($"Инициализировано новое соединение с сервером '{_server.Url.ToString()}'", EventLogEntryType.Information);
+                    }
+                    _server.Connect();
+                }
+                int prefindex = 0;
+
+                if (!string.Equals(_prefix, String.Empty))
+                {
+                    if (_debug)
+                    {
+                        _log.WriteEntry($"Задан префикс '{_prefix}'", EventLogEntryType.Information);
+                    }
+                    prefindex = _prefix.Length;
+                }
+
+                var identifiers =
+                    tags.Select(
+                        tag =>
+                            new Opc.ItemIdentifier(prefindex != 0
+                                ? _prefix + tag
+                                : tag)).ToArray();
+
+                Opc.Hda.Time startT = new Opc.Hda.Time(startTime);
+                Opc.Hda.Time endTime = new Opc.Hda.Time(stopTime);
+
+                ItemIdentifier[] items = _server.CreateItems(identifiers);
+
+                if (_debug)
+                {
+                    _log.WriteEntry($"Запрос данных к серверу '{_server.Url.ToString()}' за период '{startTime.ToString("G")}'-'{stopTime.ToString("G")}'", EventLogEntryType.Information);
+                    swMain.Start();
+                }
+                Opc.Hda.ItemValueCollection[] values = _server.ReadRaw(startT, endTime, _maxValues, includeBounds, items);
+
+                if (_debug)
+                {
+                    swMain.Stop();
+                    _log.WriteEntry($"Время выполнения запроса: {swMain.Elapsed}", EventLogEntryType.Information);
+
+                    _log.WriteEntry($"Инициализация обработки данных", EventLogEntryType.Information);
+                    swMain.Restart();
+                }
+
+                var tmpRet = new List<HdaData>(values.Select(x => x.Count).Sum());
+                foreach (var valueCol in values)
+                {
+                    HdaData temp = new HdaData(0);
+
+                    if (valueCol.ResultID != ResultID.S_OK && valueCol.ResultID != ResultID.Hda.S_MOREDATA)
+                    {
+                        if (_debug)
+                        {
+                            _log.WriteEntry(
+                                $"Ошибка при чтении данных по тегу: '{valueCol.ItemName}' ({valueCol.ResultID})",
+                                EventLogEntryType.Error);
+                        }
+
+                        continue;
+                    }
+
+                    if (valueCol.ResultID == ResultID.Hda.S_MOREDATA || valueCol.Count == _maxValues) // (|| valueCol.Count == _maxValues) перепроверить в каком то варианте не возвращается S_MOREDATA
+                    {
+                        if (_debug)
+                        {
+                            var sw = new Stopwatch();
+                            sw.Start();
+                            AddMoreData(endTime, items, valueCol);
+                            sw.Stop();
+                            _log.WriteEntry($"По тегу: '{valueCol.ItemName}' догружали данные. ({sw.Elapsed})",
+                                EventLogEntryType.Warning);
+                        }
+                        else
+                        {
+                            AddMoreData(endTime, items, valueCol);
+                        }
+                    }
+
+                    if (prefindex != 0)
+                    {
+                        int last = valueCol.ItemName.Length;
+                        temp.Tag = valueCol.ItemName.Substring(prefindex, (last - prefindex));
+                    }
+                    else
+                    {
+                        temp.Tag = valueCol.ItemName;
+                    }
+
+                    FillDescEunits(endTime, items, valueCol, temp);
+                    FillValues(goodOnly, valueCol, temp);
+                    temp.Type = type;
+                    if (_debug)
+                    {
+                        swMain.Stop();
+                        _log.WriteEntry($"Время обработки данных: {swMain.Elapsed}", EventLogEntryType.Information);
+                    }
+                    tmpRet.Add(temp);
+                }
+                //_server.Disconnect();
+                //_server.Dispose();
+                return tmpRet;
+            }
+            catch (Exception ex)
+            {
+                _log.WriteEntry($"{ex.Message}. Connection Url:'{_url.ToString()}' | {ex.Source}", EventLogEntryType.Error);
+                CloseConnection();
+                return null;
+            }
+        }

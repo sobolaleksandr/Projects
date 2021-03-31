@@ -1,15 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <PropertyGroup>
     <ProjectGuid>{074A22B3-16B6-4DE6-A539-8297FF69A019}</ProjectGuid>
     <ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>Reports</RootNamespace>
     <AssemblyName>Reports</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -30,18 +31,30 @@
     <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DocumentFormat.OpenXml">
-      <HintPath>..\..\..\..\Downloads\DocumentFormat.OpenXml.dll</HintPath>
+    <Reference Include="EleSy.Common, Version=2.0.0.12, Culture=neutral, PublicKeyToken=f5d37ef2bbc814e4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Library\EleSy.Common.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="OpcNetApi">
-      <HintPath>..\..\..\..\Downloads\OpcNetApi.dll</HintPath>
+    <Reference Include="OpcNetApi, Version=2.0.2.4, Culture=neutral, PublicKeyToken=78aea80f6827b5ab, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Library\OpcNetApi.dll</HintPath>
     </Reference>
-    <Reference Include="OpcNetApi.Com">
-      <HintPath>..\..\..\..\Downloads\OpcNetApi.Com.dll</HintPath>
+    <Reference Include="OpcNetApi.Com, Version=2.0.1.6, Culture=neutral, PublicKeyToken=78aea80f6827b5ab, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Library\OpcNetApi.Com.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -55,29 +68,34 @@
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App.cs" />
-    <Compile Include="DAServer.cs" />
-    <Compile Include="Data.cs" />
-    <Compile Include="Functions.cs" />
-    <Compile Include="HDAData.cs" />
-    <Compile Include="HDAServer.cs" />
-    <Compile Include="INIdata.cs" />
-    <Compile Include="Initiator.cs" />
-    <Compile Include="OutputFile.cs" />
+    <Compile Include="Infrostructure\Area.cs" />
+    <Compile Include="Infrostructure\Services\CodeCreater.cs" />
+    <Compile Include="Infrostructure\ControlPoint.cs" />
+    <Compile Include="Infrostructure\Services\PathCreater.cs" />
+    <Compile Include="Infrostructure\Services\Serializer.cs" />
+    <Compile Include="Main\ReportInitialize.cs" />
+    <Compile Include="Main\Report88.cs" />
+    <Compile Include="Main\Report88Day.cs" />
+    <Compile Include="Main\Report88Device.cs" />
+    <Compile Include="Main\ReportBase.cs" />
+    <Compile Include="FileHandler\XmlHandler.cs" />
+    <Compile Include="Infrostructure\Data.cs" />
+    <Compile Include="FileHandler\IniHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Report130.cs" />
-    <Compile Include="ReportBase.cs" />
-    <Compile Include="Section.cs" />
-    <Compile Include="Server.cs" />
-    <Compile Include="Settings.cs" />
-    <Compile Include="Tag.cs" />
-    <Compile Include="Time.cs" />
+    <Compile Include="Infrostructure\Section.cs" />
+    <Compile Include="Servers\DAServer.cs" />
+    <Compile Include="Servers\HDAServer.cs" />
+    <Compile Include="Servers\IServer.cs" />
+    <Compile Include="Servers\Server.cs" />
+    <Compile Include="Infrostructure\Tag.cs" />
+    <Compile Include="Servers\ServerLogger.cs" />
+    <Compile Include="Servers\Servieces\HdaData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

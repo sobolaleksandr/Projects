@@ -1,0 +1,35 @@
+Sub FindALMobjects_Step3()
+    Dim arrSCR
+    Dim SCR As GwxDisplay
+    Dim button As GwxVisible
+    Dim str As String
+    
+    arrSCR = Array("GS1_VGS.grf", "NGS12.grf", "ON23.grf", "KSU1.grf", "P123.grf", "ED.grf", "TO_UPOG.grf", "UUG15_SF.grf", "OB.grf", "EA123.grf")
+    
+    Set FS = CreateObject("Scripting.FileSystemObject")
+    Set result = FS.OpenTextFile(GetDispDirectory(ThisDisplay) & "ButtonColor\" & "result" & "_ALMALM.txt", ForWriting, True)
+    Set resultALM = FS.OpenTextFile(GetDispDirectory(ThisDisplay) & "ButtonColor\" & "result" & "_ALM.txt", ForWriting, True)
+    For k = 0 To UBound(arrSCR)
+       
+        Set button = ThisDisplay.GetVisibleObjectFromName(arrSCR(k))
+        Call button.SetAliasDefinition("ALM", 0)
+        Call button.SetAliasDefinition("ALMALM", 0)
+        fname = arrSCR(k)
+        Set tsALM = FS.OpenTextFile(GetDispDirectory(ThisDisplay) & "ButtonColor\" & fname & "_ALM.txt", ForReading, True)
+        Set tsALMALM = FS.OpenTextFile(GetDispDirectory(ThisDisplay) & "ButtonColor\" & fname & "_ALMALM.txt", ForReading, True)
+        if tsALM.AtEndOfStream <> True then
+        str = Trim(tsALM.readline)
+        'Call button.SetAliasDefinition("ALM", getAlias(button, "ALM") & str)
+        result.write (str)
+	end if
+	if tsALMALM.AtEndOfStream <> True then
+        str = Trim(tsALMALM.readline)
+        resultALM.write (str)
+        'Call button.SetAliasDefinition("ALMALM", getAlias(button, "ALMALM") & str)
+	end if
+    Next k
+
+    Set FS = Nothing
+    Set tsALM = Nothing
+    Set tsALMALM = Nothing
+End Sub
