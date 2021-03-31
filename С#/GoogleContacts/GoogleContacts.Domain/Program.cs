@@ -10,7 +10,13 @@ using System.Threading.Tasks;
 
 namespace GoogleContacts.Domain
 {
-    public static class GoogleService
+    public abstract class GoogleContacts
+    {
+
+    }
+
+
+    public static class GroupService
     {
         static PeopleServiceService service;
         static ContactGroupsResource groupsResource;
@@ -43,23 +49,31 @@ namespace GoogleContacts.Domain
 
         public static async Task<List<GroupModel>> GetGroups()
         {
-            ListContactGroupsResponse response;
+            List<GroupModel> groups = new();
 
+            if (groupsResource != null)
+            {
+                ListContactGroupsResponse response =
+                await TryGetGroups();
+
+                if (response != null)
+                    foreach (ContactGroup group in response.ContactGroups)
+                        groups.Add(new GroupModel(group));
+            }
+
+            return groups;
+        }
+
+        private static async Task<ListContactGroupsResponse> TryGetGroups()
+        {
             try
             {
-                response = await groupsResource.List().ExecuteAsync();
+                return await groupsResource?.List().ExecuteAsync();
             }
             catch
             {
                 return null;
             }
-
-            List<GroupModel> groups = new();
-
-            foreach (ContactGroup group in response.ContactGroups)
-                groups.Add(new GroupModel(group));
-
-            return groups;
         }
 
         public static async Task<GroupModel> CreateGroup(GroupModel model)
@@ -72,19 +86,22 @@ namespace GoogleContacts.Domain
                 ContactGroup = model.Map()
             };
 
-            ContactGroup response;
+            ContactGroup response = await TryToCreateGroup(request);
 
+            return response != null? new GroupModel(response) : null;
+        }
+
+        private static async Task<ContactGroup> TryToCreateGroup(CreateContactGroupRequest request)
+        {
             try
             {
-                response = await groupsResource.Create(request).ExecuteAsync();
+                return await groupsResource.Create(request).ExecuteAsync();
             }
             catch
             {
                 return null;
             }
-
-            return new GroupModel(response);
-        }
+        } 
 
         public static async Task<GroupModel> UpdateGroup(GroupModel model)
         {
@@ -96,18 +113,21 @@ namespace GoogleContacts.Domain
                 ContactGroup = model.Map()
             };
 
-            ContactGroup response;
+            ContactGroup response = await TryToUpdateGroup(request, model.modelResourceName);
 
-            try 
-            { 
-                response = await groupsResource.Update(request, model.modelResourceName).ExecuteAsync();
+            return response != null ? new GroupModel(response) : null;
+        }
+
+        private static async Task<ContactGroup> TryToUpdateGroup(UpdateContactGroupRequest request, string property)
+        {
+            try
+            {
+                return await groupsResource.Update(request, property).ExecuteAsync();
             }
             catch
             {
                 return null;
             }
-
-            return new GroupModel(response);
         }
 
         public static async Task<List<PersonModel>> GetContacts(string personFields)
@@ -126,9 +146,17 @@ namespace GoogleContacts.Domain
             return contacts;
         }
 
-        
-
-        
+        private static async Task<ContactGroup> TryToGet(UpdateContactGroupRequest request, string property)
+        {
+            try
+            {
+                return await groupsResource.Update(request, property).ExecuteAsync();
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         public static async Task<bool> DeleteGroup(GroupModel model)
         {
@@ -217,14 +245,16 @@ namespace GoogleContacts.Domain
             string personFields = "names,emailAddresses,phoneNumbers,organizations,memberships";
             List<string> resources = new List<string> { "people/c8717037971012891222" };
 
-            GoogleService.Initialize();
-            List<GroupModel> groups = await GoogleService.GetGroups();
+            //GoogleService googleService = new();
+
+            //GoogleService.Initialize();
+            //List<GroupModel> groups = await googleService.GetGroups();
             //GroupModel group = await GoogleContacts.CreateGroup(groupModel);
             //var modGroup = await GoogleContacts.ModifyGroup("contactGroups/2f4d42e08a6f5e7f",resources);
             //groupModel.modelResourceName = "contactGroups/2f4d42e08a6f5e7f";
             //var updated = await GoogleContacts.UpdateGroup(groups.FirstOrDefault());
             //GoogleContacts.CreateContact(personModel);
-            var model = (await GoogleService.GetContacts(personFields)).FirstOrDefault();
+            //var model = (await GoogleService.GetContacts(personFields)).FirstOrDefault();
             //model.modelEmail = "JohnD@yahoo.com";
             //var model = (await GoogleContacts.SearchContact(query, properties)).FirstOrDefault();
             //await GoogleContacts.UpdateContact(model, personFields);
