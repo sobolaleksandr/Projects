@@ -17,7 +17,7 @@ namespace GoogleContacts.Domain
         public string modelPhoneNumber;
         public string modelEmail;
         public string modelOrganization;
-        public ContactGroupMembership modelMembership;
+        public Membership modelMembership;
 
         public Person Map()
         {
@@ -28,7 +28,8 @@ namespace GoogleContacts.Domain
                 Names = new List<Name> { new Name {GivenName = modelGivenName, FamilyName = modelFamilyName } },
                 PhoneNumbers = new List<PhoneNumber> { new PhoneNumber { Value = modelPhoneNumber} },
                 EmailAddresses = new List<EmailAddress> { new EmailAddress { Value = modelEmail} },
-                Organizations = new List<Organization> { new Organization { Name  = modelOrganization } }
+                Organizations = new List<Organization> { new Organization { Name  = modelOrganization } },
+                Memberships = new List<Membership> { modelMembership }
             };
         }
 
@@ -48,7 +49,7 @@ namespace GoogleContacts.Domain
             modelPhoneNumber = phoneNumber?.Value ?? "";
             modelEmail = email?.Value ?? "";
             modelOrganization = organization?.Name ?? "";
-            modelMembership = membership.ContactGroupMembership;
+            modelMembership = membership;
         }
 
         public PersonModel(string givenName, string familyName, string email, string phoneNumber)

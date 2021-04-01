@@ -48,8 +48,8 @@ namespace Reports.Main
                     break;
 
                 items[i].Insert(0, "Время");
-                FillRowWithHeaders(items[i]);
-                FillRowWithValues(isTesting, opchda, path[i]);
+                FillRowWithValues(items[i]);
+                FillTableWithHdaValues(isTesting, opchda, path[i], 24 ,2);
             }
         }
     }

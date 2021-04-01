@@ -13,7 +13,7 @@ namespace GoogleContacts.Domain.Tests
     {
         private const string PERSON_FIELDS = "names,emailAddresses,phoneNumbers,organizations,memberships";
         private const string NAME = "John";
-        private const string FAMILYNAME = "Doe";
+        private const string FAMILY_NAME = "Doe";
         private const string EMAIL = "JohnD@yahoo.com";
         private const string PHONE_NUMBER = "+7800553535";
         private const string PROPERTIES = "names,emailAddresses";
@@ -84,11 +84,52 @@ namespace GoogleContacts.Domain.Tests
 
         //    Assert.True(deleteResult);
         //}
+        [Fact]
+        public async Task CreateAndDelete_WithGoodModel_ReturnsPerson()
+        {
+            //create
+            var service = new ContactService(CLIENT_SECRET, CLIENT_ID);
+            var person = new PersonModel(NAME, FAMILY_NAME, EMAIL, PHONE_NUMBER);
+
+            //PersonModel createResult = await service.Create(person);
+
+            //Assert.Equal(NAME, createResult.modelGivenName);
+            //Assert.Equal(FAMILY_NAME, createResult.modelFamilyName);
+            //Assert.Equal(EMAIL, createResult.modelEmail);
+            //Assert.Equal(PHONE_NUMBER, createResult.modelPhoneNumber);
+
+            //person = createResult;
+
+            //getall
+            //List<PersonModel> result = await service.GetAll(PERSON_FIELDS);
+
+            //Assert.Single(result);
+            //Assert.Equal(person.modelResourceName, result[0].modelResourceName);
+
+            //update
+            //person.modelGivenName = FAMILY_NAME;
+
+            //var updateResult = await service.Update(person, PERSON_FIELDS);
+
+            //Assert.Equal(FAMILY_NAME, updateResult.modelGivenName);
+
+            //search
+            List<PersonModel> result = await service.GetAll(PERSON_FIELDS);
+            var searchResult = await service.SearchContact(FAMILY_NAME, PERSON_FIELDS);
+
+            Assert.Single(searchResult);
+            Assert.Equal(person, searchResult[0]);
+
+            //delete
+            var deleteResult = await service.TryToDelete(person);
+
+            Assert.True(searchResult);
+        }
 
         [Fact]
         public async Task GetAll_WithApiError_ReturnsEmptyList()
         {
-            var service = new ContactService("","");
+            var service = new ContactService("", "");
 
             List<PersonModel> result = await service.GetAll(PERSON_FIELDS);
 
@@ -96,34 +137,20 @@ namespace GoogleContacts.Domain.Tests
         }
 
         [Fact]
-        public async Task CreateAndDelete_WithGoodModel_ReturnsPerson()
-        {
-            var service = new ContactService(CLIENT_SECRET, CLIENT_ID);
-            var person = new PersonModel(NAME, FAMILYNAME, EMAIL, PHONE_NUMBER);
-
-            PersonModel createResult = await service.Create(person);
-
-            Assert.Equal(NAME, createResult.modelGivenName);
-            Assert.Equal(FAMILYNAME, createResult.modelFamilyName);
-            Assert.Equal(EMAIL, createResult.modelEmail);
-            Assert.Equal(PHONE_NUMBER, createResult.modelPhoneNumber);
-
-            person.modelResourceName = createResult.modelResourceName;
-
-            List<PersonModel> result = await service.GetAll(PERSON_FIELDS);
-
-            Assert.Single(result);
-            Assert.Equal(person.modelResourceName, result[0].modelResourceName);
-
-            bool deleteResult = await service.TryToDeleteContact(person);
-
-            Assert.True(deleteResult);
-        }
-
-        [Fact]
         public async Task Create_WithNull_ReturnsNull()
         {
             var service = new ContactService(CLIENT_SECRET,CLIENT_ID);
+            PersonModel personModel = null;
+
+            PersonModel result = await service.Create(personModel);
+
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task Update_WithNull_ReturnsNull()
+        {
+            var service = new ContactService(CLIENT_SECRET, CLIENT_ID);
             PersonModel personModel = null;
 
             PersonModel result = await service.Create(personModel);

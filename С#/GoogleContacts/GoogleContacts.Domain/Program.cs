@@ -76,17 +76,18 @@ namespace GoogleContacts.Domain
         }
 
         //todo:get and update (coz etag after update changes)
-        public  async Task<PersonModel> UpdateContact(PersonModel personModel, string personFields)
+        public  async Task<PersonModel> Update(PersonModel personModel, string personFields)
         {
             Person person = personModel.Map();
             var updateRequest = service.People.UpdateContact(person, personModel.modelResourceName);
             updateRequest.UpdatePersonFields = personFields;
+
             var updatedContact = await updateRequest.ExecuteAsync();
 
             return new PersonModel(updatedContact);
         }
 
-        public async Task<bool> TryToDeleteContact(PersonModel personModel)
+        public async Task<bool> TryToDelete(PersonModel personModel)
         {
             try
             {

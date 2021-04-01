@@ -27,8 +27,8 @@ namespace Reports.Main
             CreateTable(ColumnNames);
         }
 
-        public string CreateHours(int index) =>
-            (index * 2).ToString("00") + ":00";
+        public string CreateHours(DateTime time) =>
+            time.ToShortTimeString();
 
         public double GetDoubleValueFromArray(object[] array, int numerator) =>
                 array.Length > numerator ? System.Convert.ToDouble(array[numerator]) : 0;
@@ -80,7 +80,7 @@ namespace Reports.Main
             table.Rows.Add(row);
         }
 
-        public void FillRowWithHeaders(List<string> values)
+        public void FillRowWithValues(List<string> values)
         {
             if (values.Count == 0)
                 return;
@@ -91,21 +91,29 @@ namespace Reports.Main
             int length = values.Count;
 
             for (int i = 0; i < length; i++)
-                row[i] = values[i];
+                row[i] = TryConvertToDouble(values[i]);
 
             table.Rows.Add(row);
         }
 
+        string TryConvertToDouble(string value)
+        {
+            if (Double.TryParse(value, out double doubleValue))
+                return doubleValue.ToString("0.000");
+            else
+                return value;
+        }
 
-        public void FillRowWithValues(bool isTesting, HDAServer opchda, List<string> values)
+        public void FillTableWithHdaValues(bool isTesting, HDAServer opchda, List<string> values, 
+            int rangeInHours, int timeIntervalInHours)
         {
             if (values.Count == 0)
                 return;
 
-            for (int i = 0; i < 12; i++)
+            for (int i = 0; i < rangeInHours; i++)
             {
-                DateTime startTime = DateTime.Now.AddHours(-1 - i * 2);
-                DateTime endTime = DateTime.Now.AddHours(-i * 2);
+                DateTime startTime = DateTime.Now.AddHours(-1 - i * timeIntervalInHours);
+                DateTime endTime = DateTime.Now.AddHours(-i * timeIntervalInHours);
 
                 Data array = new Data { Values = opchda.GetData(startTime, endTime, values) };
 
@@ -114,18 +122,29 @@ namespace Reports.Main
 
                 var list = array.ConvertToString().ToList();
 
-                foreach (var value in list)
-                    Console.WriteLine("{0} - startTime, {1} - endTime, {2} - value", startTime, endTime, value);
+                list.Insert(0, CreateHours(endTime));
 
-                list.Insert(0, CreateHours(i));
-
-                FillRowWithHeaders(list);
+                FillRowWithValues(list);
             }
+        }
+
+        
+        public void FillTableWithDaValues(bool isTesting, DAServer opcda, List<string> tags)
+        {
+            if (tags.Count == 0)
+                return;
+
+            Data DaData = new Data { Values = opcda.GetData(tags) };
+
+            if (isTesting)
+                DaData.RandomDouble(MaxTestingValue);
+
+            FillRowWithValues(DaData.ConvertToString().ToList());
         }
 
         public List<List<string>> SplitList(List<string> list, int chunkLength)
         {
-            return Enumerable.Range(0, 10)
+            return Enumerable.Range(0, list.Count/chunkLength + 1)
                              .Select(i => list.Skip(i * chunkLength)
                                               .Take(chunkLength)
                                               .ToList())

@@ -16,17 +16,17 @@ namespace Application
             object[] obj = new object[3];
 
             DataSet ds = new DataSet();
-            //try
-            //{
-            //    ds = sk.GetData(ref StartingString);
-            //}
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine(ex.Message);
-            //}
+            try
+            {
+                ds = sk.GetData(obj);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
             //ds = sk.GetData986_99(obj);
-            ds = sk.GetData(obj);
+            //ds = sk.GetData(obj);
 
             int rowcount = ds.Tables[0].Rows.Count;
             //int columncount = ds.Tables[0].Columns.Count;

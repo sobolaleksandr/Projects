@@ -9,7 +9,7 @@ using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Scripts._1042_02
+namespace Scripts._1042_02_operative
 {
     /// <summary>
     /// Класс используется для подготовки набора данных.
@@ -18,13 +18,10 @@ namespace Scripts._1042_02
     {
         public DataSet GetData(object[] parameters)
         {
-            const int RANGE_IN_HOURS = 24;
-            const int TIME_INTERVAL_IN_HOURS = 2;
             const bool FILTERED_PATHS = false;
             const int MAX_TESTING_VALUE = 100;
-            string[] COLUMN_NAMES = { "TimeStamp", "value1", "value2", "value3"};
+            string[] COLUMN_NAMES = {"value1", "value2", "value3"};
             string[] SPLITTER = new string[] { "Desc", "Value" };
-            const int VALUE_COLS_COUNT = 3;
 
             ReportInitialize initiator = new ReportInitialize(SPLITTER, FILTERED_PATHS);
             initiator.isTesting = false;
@@ -54,10 +51,10 @@ namespace Scripts._1042_02
                 }
             }
 
-            Report1042 report = new Report1042(initiator.Sections, COLUMN_NAMES,
+            Report1042_operative report = new Report1042_operative
+                (initiator.Sections, COLUMN_NAMES,
                 MAX_TESTING_VALUE, initiator.isTesting,
-                initiator.opchda, initiator.opcda, VALUE_COLS_COUNT, 
-                RANGE_IN_HOURS, TIME_INTERVAL_IN_HOURS, group);
+                initiator.opcda, group);
 
             initiator.opcda.Disconnect();
             initiator.opchda.Disconnect();
@@ -65,27 +62,23 @@ namespace Scripts._1042_02
             return report.result;
         }
     }
-    public class Report1042 : ReportBase
+    public class Report1042_operative : ReportBase
     {
-        readonly HDAServer opchda;
-        readonly int valueColsCount;
+        readonly DAServer opcda;
         readonly bool isTesting;
-        readonly int rangeInHours;
-        readonly int timeIntevalInHours;
 
-        public Report1042(List<Section> sections, string[] ColumnNames,
+
+        public Report1042_operative(List<Section> sections, string[] ColumnNames,
             int MaxTestingValue, bool isTesting,
-            HDAServer opchda, DAServer opcda, int valueColsCount, 
-            int rangeInHours, int timeIntevalInHours, Area group) :
+            DAServer opcda, Area group 
+            ) :
         base(sections, ColumnNames, MaxTestingValue)
         {
             this.isTesting = isTesting;
-            this.opchda = opchda;
-            this.valueColsCount = valueColsCount;
-            this.rangeInHours = rangeInHours;
-            this.timeIntevalInHours = timeIntevalInHours;
+            this.opcda = opcda;
 
             group.Items = ConvertToStringList(opcda.GetData(group.Items));
+
             FillTableWithGroup(group);
         }
 
@@ -105,8 +98,8 @@ namespace Scripts._1042_02
 
         public void FillTableWithGroup(Area group)
         {
-            var items = SplitList(group.Items, valueColsCount);
-            var path = SplitList(group.Path, valueColsCount);
+            var items = SplitList(group.Items, ColumnNames.Length);
+            var path = SplitList(group.Path, ColumnNames.Length);
             int length = items.Count;
 
             for (int i = 0; i < length; i++)
@@ -114,10 +107,8 @@ namespace Scripts._1042_02
                 if (items[i].Count == 0)
                     break;
 
-                items[i].Insert(0, "Время");
                 FillRowWithValues(items[i]);
-                FillTableWithHdaValues(isTesting, opchda, path[i], 
-                    rangeInHours, timeIntevalInHours);
+                FillTableWithDaValues(isTesting, opcda, path[i]);
             }
         }
     }
