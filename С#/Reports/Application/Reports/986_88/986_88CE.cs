@@ -34,7 +34,7 @@ namespace Scripts._986_88_CE
             PathCreater append = new PathCreater(initiator.Sections);
             initiator.Sections = append.sections;
 
-            initiator.GetData();
+            initiator.GetAllDataFromServer();
 
             Report88CE report = new Report88CE(initiator.Sections, ColumnNames,
                 MaxTestingValue, initiator.isTesting, initiator.opcda);

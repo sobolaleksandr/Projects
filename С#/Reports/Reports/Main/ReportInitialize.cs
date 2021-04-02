@@ -19,7 +19,6 @@ namespace Reports.Main
         public bool FailedDaConnection = true;
         public bool FailedHdaConnection = true;
 
-
         private readonly XmlHandler settings;
 
         public ReportInitialize()
@@ -36,7 +35,7 @@ namespace Reports.Main
 
         public ReportInitialize(string[] Splitter, bool FilteredPaths) : this()
         {
-            IniHandler inidata = new IniHandler(settings.INIPath, Splitter, FilteredPaths);
+            IniHandler inidata = new IniHandler(settings.IniPath, Splitter, FilteredPaths);
             Sections = inidata.Parse();
 
             opchda = new HDAServer(settings.HdaProperties);
@@ -45,7 +44,7 @@ namespace Reports.Main
                 FailedHdaConnection = false;
         }
 
-        public void GetData()
+        public void GetAllDataFromServer()
         {
             DateTime startTime = DateTime.Now.AddHours(-13);
             DateTime endTime = DateTime.Now.AddHours(-12);

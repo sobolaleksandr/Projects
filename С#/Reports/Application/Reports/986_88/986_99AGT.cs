@@ -50,7 +50,7 @@ namespace Scripts._986_88_AGT
             PathCreater append = new PathCreater(initiator.Sections);
             initiator.Sections = append.sections;
 
-            initiator.GetData();
+            initiator.GetAllDataFromServer();
 
             Report88Device report = new Report88Device(initiator.Sections, ColumnNames,
                 MaxTestingValue, initiator.isTesting,

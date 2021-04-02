@@ -31,7 +31,7 @@ namespace Reports.FileHandler
             Path = "opchda://"
         };
 
-        public string INIPath = @"C:\Data\Reports\1042_02.ini";
+        public string IniPath = @"C:\Data\Reports\1042_02.ini";
 
         public XmlHandler(string path)
         {
@@ -82,7 +82,7 @@ namespace Reports.FileHandler
             switch (elem.FirstAttribute.Name.LocalName)
             {
                 case "path":
-                    INIPath = value;
+                    IniPath = value;
                     break;
                 case "DApath":
                     DaProperties.Path = value;
@@ -108,7 +108,7 @@ namespace Reports.FileHandler
                     new XElement("SlaveIP",     DaProperties.SlaveIp),
                     new XElement("OPCServer",   DaProperties.Type)),
                 new XElement("object",
-                    new XAttribute("path", INIPath)),
+                    new XAttribute("path", IniPath)),
                 new XElement("object",
                     new XAttribute("DApath", DaProperties.Path)),
                 new XElement("object",

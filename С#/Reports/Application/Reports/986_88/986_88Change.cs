@@ -33,7 +33,7 @@ namespace Scripts._986_88_Change
             PathCreater append = new PathCreater(initiator.Sections);
             initiator.Sections = append.sections;
 
-            initiator.GetData();
+            initiator.GetAllDataFromServer();
 
             Report88Change report = new Report88Change(initiator.Sections, ColumnNames, MaxTestingValue, initiator.isTesting, dayPath);
 

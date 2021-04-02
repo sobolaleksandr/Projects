@@ -13,9 +13,6 @@ namespace GoogleContacts.Domain
     {
         ContactGroupsResource groupsResource;
 
-        //private static readonly string m_client_secret = "uavwQnDWY6bUEFf75pXtP0m6";
-        //private static readonly string m_client_id = "217336154173-tdce9e8b3c9hjfsd9abnfb7q0ef4q9ab.apps.googleusercontent.com";
-
         public GroupService(string client_secret, string client_id)
         {
             // Create OAuth credential.
@@ -128,8 +125,8 @@ namespace GoogleContacts.Domain
             if (groupsResource == null)
                 return false;
 
-            try
-            {
+            try 
+            { 
                 await groupsResource.Delete(model.modelResourceName).ExecuteAsync();
                 return true;
             }

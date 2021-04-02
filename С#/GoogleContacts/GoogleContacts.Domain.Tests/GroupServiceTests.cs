@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Xunit.Sdk;
 using Xunit.Abstractions;
+using System.Threading;
 
 namespace GoogleContacts.Domain.Tests
 {
@@ -16,18 +17,19 @@ namespace GoogleContacts.Domain.Tests
         private const string CLIENT_SECRET = "uavwQnDWY6bUEFf75pXtP0m6";
         private const string CLIENT_ID = "217336154173-tdce9e8b3c9hjfsd9abnfb7q0ef4q9ab.apps.googleusercontent.com";
 
-        static GroupService groupService = new(CLIENT_SECRET,CLIENT_ID);
+        static readonly GroupService groupService = new(CLIENT_SECRET,CLIENT_ID);
+        static GroupModel groupModel = new(NAME);
 
         //todo modify tests
-        //[Fact]
+        [Fact]
         public async Task CRUD_Group()
         {
             await GetAll_Initialized_ReturnsGroups();
-
+            Thread.Sleep(3000);
             await Create_WithGroup_ReturnsGroup();
-
+            Thread.Sleep(3000);
             await Update_WithGroup_ReturnsGroup();
-
+            Thread.Sleep(3000);
             await Delete_WithGroup_ReturnsTrue();
         }
 
@@ -35,29 +37,29 @@ namespace GoogleContacts.Domain.Tests
         {
             List<GroupModel> groups = await groupService.GetAll();
 
-            Assert.Equal(10, groups.Count);
+            Assert.Equal(8, groups.Count);
         }
 
         internal static async Task Create_WithGroup_ReturnsGroup()
         {
-            GroupModel groupModel = new(NAME);
-
             var createResult = await groupService.Create(groupModel);
 
             Assert.Equal(NAME, createResult.modelFormattedName);
+
+            groupModel = createResult;
         }
 
         internal static async Task Update_WithGroup_ReturnsGroup()
         {
-            var groupModel = (await groupService.GetAll())
-                .Where(g => g.modelFormattedName == NAME)
-                .SingleOrDefault();
             groupModel.modelFormattedName = CHANGED_NAME;
 
             var result = await groupService.Update(groupModel);
 
             Assert.Equal(groupModel.modelFormattedName, result.modelFormattedName);
+
+            groupModel = result;
         }
+
         //todo getContacts to add in group
         internal static async Task Modify_WithGroup_ReturnsTrue()
         {
@@ -73,9 +75,6 @@ namespace GoogleContacts.Domain.Tests
 
         internal static async Task Delete_WithGroup_ReturnsTrue()
         {
-            var groupModel = (await groupService.GetAll())
-                .Where(g => g.modelFormattedName == CHANGED_NAME).SingleOrDefault();
-
             bool deleteResult = await groupService.Delete(groupModel);
 
             Assert.True(deleteResult);
